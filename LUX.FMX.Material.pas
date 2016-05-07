@@ -4,6 +4,7 @@ interface //####################################################################
 
 uses FMX.Types3D, System.Classes, System.UITypes, System.Generics.Collections,
      System.Math.Vectors,
+     FMX.MaterialSources,
      Winapi.D3DCommon, Winapi.D3D11Shader, Winapi.D3DCompiler,
      LUX;
 
@@ -20,6 +21,10 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
          TShaderVarTexture = class;
        TShaderVarLights    = class;
      TShaderSource         = class;
+
+     TLuxMaterial          = class;
+
+     ///////////////////////////////////////////////////////////////////////////
 
      TShaderVars = array of TShaderVar;
 
@@ -217,22 +222,23 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        _Errors  :TDictionary<AnsiString,AnsiString>;
        ///// アクセス
        function GetKind :TContextShaderKind; virtual; abstract;
+       procedure SetSource( Sender_:TObject );
      public
        constructor Create;
        destructor Destroy; override;
        ///// プロパティ
-       property Name   :String             read   _Name   write _Name;
+       property Name   :String             read   _Name   write _Name  ;
        property Shader :TContextShader     read   _Shader write _Shader;
-       property Kind   :TContextShaderKind read GetKind;
-       property Vars   :TShaderVars        read   _Vars   write _Vars;
-       property Entry  :AnsiString         read   _Entry  write _Entry;
-       property Source :TStringList        read   _Source;
+       property Kind   :TContextShaderKind read GetKind                ;
+       property Vars   :TShaderVars        read   _Vars   write _Vars  ;
+       property Entry  :AnsiString         read   _Entry  write _Entry ;
+       property Source :TStringList        read   _Source              ;
        ///// メソッド
        procedure LoadFromFile( const Name_:String );
        procedure LoadFromStream( const Stream_:TStream );
        procedure LoadFromResource( const Name_:String );
        function CSV( const A_:TContextShaderArch ) :TContextShaderVariables;
-       procedure Init;
+       procedure Compile;
        procedure SendVars( const Context_:TContext3D );
        function GetSources :String;
      end;
@@ -259,17 +265,52 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        constructor Create;
      end;
 
+     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TLuxMaterial
+
+     TLuxMaterial = class( TMaterial )
+     private
+     protected
+       _ShaderV :TShaderSourceV;
+       _ShaderP :TShaderSourceP;
+     public
+       constructor Create; override;
+       destructor Destroy; override;
+       ///// プロパティ
+       property ShaderV :TShaderSourceV read _ShaderV;
+       property ShaderP :TShaderSourceP read _ShaderP;
+     end;
+
+     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TMaterialSource<_TMaterial_>
+
+     TLuxMaterialSource<_TMaterial_:TLuxMaterial> = class( TMaterialSource )
+     private
+       ///// アクセス
+       function GetMaterial :_TMaterial_;
+     protected
+       ///// アクセス
+       function GetShaderV :TShaderSourceV;
+       function GetShaderP :TShaderSourceP;
+       ///// プロパティ
+       property _Material :_TMaterial_ read GetMaterial;
+       ///// メソッド
+       function CreateMaterial: TMaterial; override;
+     public
+       ///// プロパティ
+       property ShaderV :TShaderSourceV read GetShaderV;
+       property ShaderP :TShaderSourceP read GetShaderP;
+     end;
+
 const //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【定数】
 
-      _VarUnit :array [ TContextShaderArch ] of Byte = (  1,    // Undefined,
-                                                          1,    // DX9,
-                                                         16,    // DX10,
-                                                         16,    // DX11_level_9,
-                                                         16,    // DX11,
-                                                          1,    // GLSL,
-                                                          1,    // Mac,
-                                                          1,    // IOS,
-                                                          1 );  // Android
+      VARUNIT :array [ TContextShaderArch ] of Byte = (  1,    // Undefined,
+                                                         1,    // DX9,
+                                                        16,    // DX10,
+                                                        16,    // DX11_level_9,
+                                                        16,    // DX11,
+                                                         1,    // GLSL,
+                                                         1,    // Mac,
+                                                         1,    // IOS,
+                                                         1 );  // Android
 
 //var //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【変数】
 
@@ -277,7 +318,7 @@ const //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 implementation //############################################################### ■
 
-uses System.Types, System.SysUtils, System.IOUtils, System.Math, Main;
+uses System.Types, System.SysUtils, System.IOUtils, System.Math;
 
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【レコード】
 
@@ -624,13 +665,20 @@ end;
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& protected
 
+procedure TShaderSource.SetSource( Sender_:TObject );
+begin
+     Compile;
+end;
+
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
 
 constructor TShaderSource.Create;
 begin
      inherited;
 
-     _Source  := TStringList.Create;
+     _Source := TStringList.Create;
+     _Source.OnChange := SetSource;
+
      _Targets := TDictionary<TContextShaderArch,AnsiString>.Create;
      _Errors  := TDictionary<AnsiString,AnsiString>.Create;
 end;
@@ -639,7 +687,8 @@ destructor TShaderSource.Destroy;
 begin
      _Errors .Free;
      _Targets.Free;
-     _Source .Free;
+
+     _Source.Free;
 
      inherited;
 end;
@@ -652,7 +701,7 @@ begin
 
      _Name := TPath.GetFileName( Name_ );
 
-     Init;
+     Compile;
 end;
 
 procedure TShaderSource.LoadFromStream( const Stream_:TStream );
@@ -661,7 +710,7 @@ begin
 
      _Name := '';
 
-     Init;
+     Compile;
 end;
 
 procedure TShaderSource.LoadFromResource( const Name_:String );
@@ -686,10 +735,10 @@ var
 begin
      Result := [];  I := 0;
 
-     for V in _Vars do Result := Result + V.AddVar( I, _VarUnit[ A_ ] );
+     for V in _Vars do Result := Result + V.AddVar( I, VARUNIT[ A_ ] );
 end;
 
-procedure TShaderSource.Init;
+procedure TShaderSource.Compile;
 var
    S, N, T :AnsiString;
    CSS :array of TContextShaderSource;
@@ -698,6 +747,8 @@ var
    B, E :ID3DBlob;
    C :TArray<Byte>;
 begin
+     TShaderManager.UnregisterShader( _Shader );
+
      S := AnsiString( GetSources + _Source.Text );
      N := AnsiString( _Name );
 
@@ -732,7 +783,7 @@ begin
           CSS := CSS + [ TContextShaderSource.Create( A, C, CSV( A ) ) ];
      end;
 
-     Shader := TShaderManager.RegisterShaderFromData( _Name, GetKind, '', CSS );
+     _Shader := TShaderManager.RegisterShaderFromData( _Name, GetKind, '', CSS );
 end;
 
 procedure TShaderSource.SendVars( const Context_:TContext3D );
@@ -803,6 +854,64 @@ begin
      _Targets.Add( TContextShaderArch.DX11_level_9, 'ps_4_0_level_9_3' );
      _Targets.Add( TContextShaderArch.DX11        , 'ps_5_0'           );
 end;
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TLuxMaterial
+
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& private
+
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& protected
+
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
+
+constructor TLuxMaterial.Create;
+begin
+     inherited;
+
+     _ShaderV := TShaderSourceV.Create;
+     _ShaderP := TShaderSourceP.Create;
+end;
+
+destructor TLuxMaterial.Destroy;
+begin
+     _ShaderV.Free;
+     _ShaderP.Free;
+
+     inherited;
+end;
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TLuxMaterialSource<_TMaterial_>
+
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& private
+
+/////////////////////////////////////////////////////////////////////// アクセス
+
+function TLuxMaterialSource<_TMaterial_>.GetMaterial :_TMaterial_;
+begin
+     Result := _TMaterial_( Material );
+end;
+
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& protected
+
+/////////////////////////////////////////////////////////////////////// アクセス
+
+function TLuxMaterialSource<_TMaterial_>.GetShaderV :TShaderSourceV;
+begin
+     Result := _Material.ShaderV;
+end;
+
+function TLuxMaterialSource<_TMaterial_>.GetShaderP :TShaderSourceP;
+begin
+     Result := _Material.ShaderP;
+end;
+
+/////////////////////////////////////////////////////////////////////// メソッド
+
+function TLuxMaterialSource<_TMaterial_>.CreateMaterial: TMaterial;
+begin
+     Result := _TMaterial_.Create;
+end;
+
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
 
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【ルーチン】
 
