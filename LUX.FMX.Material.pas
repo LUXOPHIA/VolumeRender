@@ -176,6 +176,7 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        function GetSize :Integer; override;
      public
        ///// メソッド
+       function GetVars( var I_,T_:Integer; const U_:Byte ) :TContextShaderVariables; override;
        procedure SendVar( const Context_:TContext3D ); override;
        function GetSource( var C_:Integer; var T_:Integer ) :String; override;
      end;
@@ -607,14 +608,21 @@ end;
 
 /////////////////////////////////////////////////////////////////////// メソッド
 
+function TShaderVarMatrix3D.GetVars( var I_,T_:Integer; const U_:Byte ) :TContextShaderVariables;
+begin
+     Result := [ TContextShaderVariable.Create( Name + '_', Kind, I_, U_ * Size ) ];
+
+     Inc( I_, Size * U_ );
+end;
+
 procedure TShaderVarMatrix3D.SendVar( const Context_:TContext3D );
 begin
-     Context_.SetShaderVariable( _Name, _Value );
+     Context_.SetShaderVariable( _Name + '_', _Value );
 end;
 
 function TShaderVarMatrix3D.GetSource( var C_:Integer; var T_:Integer ) :String;
 begin
-     Result := 'float4x4 ' + _Name + ' : register( c' + c_.ToString + ' );' + CRLF;
+     Result := 'float4x4 ' + _Name + '_ : register( c' + c_.ToString + ' );  static float4x4 ' + _Name + ' = transpose( ' + _Name + '_ );' + CRLF;
 
      Inc( c_, Size );
 end;
