@@ -135,6 +135,7 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 implementation //############################################################### ■
 
 uses System.SysUtils, System.RTLConsts, System.AnsiStrings,
+     FMX.Controls,
      LUX.D3;
 
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【レコード】
@@ -437,9 +438,8 @@ end;
 
 procedure TLuxViewport3D.RebuildRenderingList;
 var
-   I :Integer;
-   CompareFunc :TRenderingCompare;
    F :TFmxObject;
+ //CompareFunc :TRenderingCompare;
 begin
      with TViewport3D( Camera.Viewport ) do
      begin
