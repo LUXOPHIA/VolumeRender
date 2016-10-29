@@ -132,6 +132,8 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【ルーチン】
 
+function GapFit( const P0_,P1_:TPoint3D ) :TMatrix3D;
+
 implementation //############################################################### ■
 
 uses System.SysUtils, System.RTLConsts, System.AnsiStrings,
@@ -581,6 +583,35 @@ begin
 end;
 
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【ルーチン】
+
+function GapFit( const P0_,P1_:TPoint3D ) :TMatrix3D;
+var
+   AX, AY ,AZ, AP, E :TPoint3D;
+begin
+     AY := ( P1_ - P0_ ).Normalize;
+     AP := ( P1_ + P0_ ) / 2;
+
+     with AY do
+     begin
+          case MinI( Abs( X ), Abs( Y ) ,Abs( Z ) ) of
+            1: E := TPoint3D.Create( 1, 0, 0 );
+            2: E := TPoint3D.Create( 0, 1, 0 );
+            3: E := TPoint3D.Create( 0, 0, 1 );
+          end;
+
+          AZ := CrossProduct( E ).Normalize;
+
+          AX := CrossProduct( AZ );
+     end;
+
+     with Result do
+     begin
+          m11 := AX.X;  m12 := AX.Y;  m13 := AX.Z;  m14 := 0;
+          m21 := AY.X;  m22 := AY.Y;  m23 := AY.Z;  m24 := 0;
+          m31 := AZ.X;  m32 := AZ.Y;  m33 := AZ.Z;  m34 := 0;
+          m41 := AP.X;  m42 := AP.Y;  m43 := AP.Z;  m44 := 1;
+     end;
+end;
 
 //############################################################################## □
 
