@@ -832,12 +832,12 @@ end;
 
 procedure TShaderSource.Compile;
 var
-   S, N, T :AnsiString;
+   S, N, T, Cs :AnsiString;
    CSSs :array of TContextShaderSource;
    A :TContextShaderArch;
    H :HResult;
    B, E :ID3DBlob;
-   C :TArray<Byte>;
+   Bs :TArray<Byte>;
 begin
      TShaderManager.UnregisterShader( _Shader );
 
@@ -866,15 +866,19 @@ begin
 
           if not Assigned( B ) then
           begin
-               _Errors.Add( T, AnsiString( E.GetBufferPointer ) );
+               SetLength( Cs, E.GetBufferSize );
+
+               StrCopy( PAnsiChar( Cs ), E.GetBufferPointer );
+
+               _Errors.Add( T, Cs );
 
                Exit;
           end;
 
-          SetLength( C, B.GetBufferSize );
-          Move( B.GetBufferPointer^, C[0], B.GetBufferSize );
+          SetLength( Bs, B.GetBufferSize );
+          Move( B.GetBufferPointer^, Bs[0], B.GetBufferSize );
 
-          CSSs := CSSs + [ TContextShaderSource.Create( A, C, GetVars( A ) ) ];
+          CSSs := CSSs + [ TContextShaderSource.Create( A, Bs, GetVars( A ) ) ];
      end;
 
      _Shader := TShaderManager.RegisterShaderFromData( _Name, GetKind, '', CSSs );
