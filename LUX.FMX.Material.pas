@@ -329,7 +329,7 @@ const //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 implementation //############################################################### ■
 
-uses System.SysUtils, System.IOUtils, System.Math;
+uses System.SysUtils, System.IOUtils, System.Math, System.AnsiStrings;
 
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【レコード】
 
@@ -868,7 +868,7 @@ begin
           begin
                SetLength( Cs, E.GetBufferSize );
 
-               StrCopy( PAnsiChar( Cs ), E.GetBufferPointer );
+               System.AnsiStrings.StrCopy( PAnsiChar( Cs ), E.GetBufferPointer );
 
                _Errors.Add( T, Cs );
 
