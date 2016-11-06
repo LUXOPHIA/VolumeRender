@@ -110,9 +110,9 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        procedure RebuildRenderingList;
      end;
 
-     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TTensors
+     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TTensorShape
 
-     TTensors = class( TControl3D )
+     TTensorShape = class( TControl3D )
      private
      protected
        _GeometryX :TMeshData;
@@ -122,20 +122,29 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        _MaterialY :TColorMaterialSource;
        _MaterialZ :TColorMaterialSource;
        _MeshData  :TMeshData;
-       _AxisSize  :Single;
+       _AxisLeng  :Single;
        ///// アクセス
        procedure SetMeshData( const MeshData_:TMeshData );
-       procedure SetAxisSize( const AxisSize_:Single );
+       procedure SetAxisLeng( const AxisLeng_:Single );
+       function GetColorX :TAlphaColor;
+       procedure SetColorX( const ColorX_:TAlphaColor );
+       function GetColorY :TAlphaColor;
+       procedure SetColorY( const ColorY_:TAlphaColor );
+       function GetColorZ :TAlphaColor;
+       procedure SetColorZ( const ColorZ_:TAlphaColor );
        ///// メソッド
        procedure Render; override;
      public
        constructor Create( Owner_:TComponent ); override;
        destructor Destroy; override;
        ///// プロパティ
-       property MeshData :TMeshData read _MeshData write SetMeshData;
-       property AxisSize :Single    read _AxisSize write SetAxisSize;
+       property MeshData :TMeshData   read   _MeshData write SetMeshData;
+       property AxisLeng :Single      read   _AxisLeng write SetAxisLeng;
+       property ColorX   :TAlphaColor read GetColorX   write SetColorX  ;
+       property ColorY   :TAlphaColor read GetColorY   write SetColorY  ;
+       property ColorZ   :TAlphaColor read GetColorZ   write SetColorZ  ;
        ///// メソッド
-       procedure MakeModel;
+       procedure MakeShape;
      end;
 
 //const //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【定数】
@@ -554,7 +563,7 @@ begin
      end;
 end;
 
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TTensors
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TTensorShape
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& private
 
@@ -562,19 +571,51 @@ end;
 
 /////////////////////////////////////////////////////////////////////// アクセス
 
-procedure TTensors.SetMeshData( const MeshData_:TMeshData );
+procedure TTensorShape.SetMeshData( const MeshData_:TMeshData );
 begin
-     _MeshData := MeshData_;  MakeModel;
+     _MeshData := MeshData_;  MakeShape;
 end;
 
-procedure TTensors.SetAxisSize( const AxisSize_:Single );
+procedure TTensorShape.SetAxisLeng( const AxisLeng_:Single );
 begin
-     _AxisSize := AxisSize_;  MakeModel;
+     _AxisLeng := AxisLeng_;  MakeShape;
+end;
+
+//------------------------------------------------------------------------------
+
+function TTensorShape.GetColorX :TAlphaColor;
+begin
+     Result := _MaterialX.Color;
+end;
+
+procedure TTensorShape.SetColorX( const ColorX_:TAlphaColor );
+begin
+     _MaterialX.Color := ColorX_;  Repaint;
+end;
+
+function TTensorShape.GetColorY :TAlphaColor;
+begin
+     Result := _MaterialY.Color;
+end;
+
+procedure TTensorShape.SetColorY( const ColorY_:TAlphaColor );
+begin
+     _MaterialY.Color := ColorY_;  Repaint;
+end;
+
+function TTensorShape.GetColorZ :TAlphaColor;
+begin
+     Result := _MaterialZ.Color;
+end;
+
+procedure TTensorShape.SetColorZ( const ColorZ_:TAlphaColor );
+begin
+     _MaterialZ.Color := ColorZ_;  Repaint;
 end;
 
 /////////////////////////////////////////////////////////////////////// メソッド
 
-procedure TTensors.Render;
+procedure TTensorShape.Render;
 begin
      with Context do
      begin
@@ -588,7 +629,7 @@ end;
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
 
-constructor TTensors.Create( Owner_:TComponent );
+constructor TTensorShape.Create( Owner_:TComponent );
 begin
      inherited;
 
@@ -602,14 +643,14 @@ begin
      _MaterialY := TColorMaterialSource.Create( Self );
      _MaterialZ := TColorMaterialSource.Create( Self );
 
-     _MaterialX.Color := TAlphaColors.Red;
+     _MaterialX.Color := TAlphaColors.Red ;
      _MaterialY.Color := TAlphaColors.Lime;
      _MaterialZ.Color := TAlphaColors.Blue;
 
-     _AxisSize := 0.05;
+     _AxisLeng := 0.05;
 end;
 
-destructor TTensors.Destroy;
+destructor TTensorShape.Destroy;
 begin
      _GeometryX.Free;
      _GeometryY.Free;
@@ -620,10 +661,10 @@ end;
 
 /////////////////////////////////////////////////////////////////////// メソッド
 
-procedure TTensors.MakeModel;
+procedure TTensorShape.MakeShape;
 var
    N, I, J :Integer;
-   P, EX, EY, EZ :TPoint3D;
+   AO, AX, AY, AZ :TPoint3D;
 begin
      with _MeshData.VertexBuffer do
      begin
@@ -640,14 +681,14 @@ begin
           J := 0;
           for I := 0 to Length-1 do
           begin
-               P  := Vertices [ I ];
-               EX := Tangents [ I ];
-               EY := BiNormals[ I ];
-               EZ := Normals  [ I ];
+               AO := Vertices [ I ];
+               AX := Tangents [ I ];
+               AY := BiNormals[ I ];
+               AZ := Normals  [ I ];
 
-               _GeometryX.VertexBuffer.Vertices[ J ] := P;
-               _GeometryY.VertexBuffer.Vertices[ J ] := P;
-               _GeometryZ.VertexBuffer.Vertices[ J ] := P;
+               _GeometryX.VertexBuffer.Vertices[ J ] := AO;
+               _GeometryY.VertexBuffer.Vertices[ J ] := AO;
+               _GeometryZ.VertexBuffer.Vertices[ J ] := AO;
 
                _GeometryX.IndexBuffer .Indices [ J ] := J;
                _GeometryY.IndexBuffer .Indices [ J ] := J;
@@ -655,9 +696,9 @@ begin
 
                Inc( J );
 
-               _GeometryX.VertexBuffer.Vertices[ J ] := P + _AxisSize * EX;
-               _GeometryY.VertexBuffer.Vertices[ J ] := P + _AxisSize * EY;
-               _GeometryZ.VertexBuffer.Vertices[ J ] := P + _AxisSize * EZ;
+               _GeometryX.VertexBuffer.Vertices[ J ] := AO + _AxisLeng * AX;
+               _GeometryY.VertexBuffer.Vertices[ J ] := AO + _AxisLeng * AY;
+               _GeometryZ.VertexBuffer.Vertices[ J ] := AO + _AxisLeng * AZ;
 
                _GeometryX.IndexBuffer .Indices [ J ] := J;
                _GeometryY.IndexBuffer .Indices [ J ] := J;
@@ -666,6 +707,8 @@ begin
                Inc( J );
           end;
      end;
+
+     Repaint;
 end;
 
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【ルーチン】
