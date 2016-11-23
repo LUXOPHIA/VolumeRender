@@ -118,8 +118,8 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        property MaxPos  :Single read GetMaxPosX;
        property MaxPosX :Single read GetMaxPosX;
        ///// メソッド
-       function Interp( const I_:Single ) :_TItem_; overload;
-       function InterpPos( const Pos_:Single ) :_TItem_; overload;
+       function Interp( const I_:Single ) :_TItem_; overload; virtual;
+       function InterpPos( const Pos_:Single ) :_TItem_; overload; virtual;
        function AddLast( const Pos_:Single; const Val_:_TItem_ ) :Integer; overload;
        function Insert( const PV_:TPosval1D<_TItem_> ) :Integer; overload;
        function Insert( const Pos_:Single; const Val_:_TItem_ ) :Integer; overload;

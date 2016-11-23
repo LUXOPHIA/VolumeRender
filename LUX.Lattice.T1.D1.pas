@@ -16,10 +16,12 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
      private
      protected
        ///// メソッド
-       function Interp( const G0_,G1_,G2_,G3_:Single; const Id_:Single ) :Single; override;
-       function InterpPos( const G0_,G1_,G2_,G3_:TPosval1D<Single>; const Pos_:Single ) :Single; override;
+       function Interp( const G0_,G1_,G2_,G3_:Single; const Id_:Single ) :Single; overload; override;
+       function InterpPos( const G0_,G1_,G2_,G3_:TPosval1D<Single>; const Pos_:Single ) :Single; overload; override;
      public
        ///// メソッド
+       function Interp( const I_:Single ) :Single; override;                    {ToDo: ジェネリックスのエラーバグ対策}
+       function InterpPos( const Pos_:Single ) :Single; override;               {ToDo: ジェネリックスのエラーバグ対策}
        procedure MakeEdgeExtend;
      end;
 
@@ -57,6 +59,16 @@ end;
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
 
 /////////////////////////////////////////////////////////////////////// メソッド
+
+function TSingleIrreMap1D.Interp( const I_:Single ) :Single;
+begin
+     Result := inherited;
+end;
+
+function TSingleIrreMap1D.InterpPos( const Pos_:Single ) :Single;
+begin
+     Result := inherited;
+end;
 
 procedure TSingleIrreMap1D.MakeEdgeExtend;
 var
