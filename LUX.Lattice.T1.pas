@@ -50,8 +50,10 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        property MarginX                  :Integer read   _MarginX write SetMarginX;
        ///// メソッド
        class procedure Swap( var Array0_,Array1_:TArray1D<_TItem_> ); static;
-       procedure MakeEdgeLoop;
-       function AddLast( const Item_:_TItem_ ) :Integer;
+       procedure MakeEdgeExten; virtual;
+       procedure MakeEdgePerio; virtual; abstract;
+       procedure MakeEdgeMirro; virtual; abstract;
+       function AddTail( const Item_:_TItem_ ) :Integer;
      end;
 
      //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TBricArray1D<_TItem_>
@@ -69,6 +71,9 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        property BricX                    :Integer read   _CountX write SetCountX;
        property GridN                    :Integer read GetGridX  write SetGridX ;
        property GridX                    :Integer read GetGridX  write SetGridX ;
+       ///// メソッド
+       procedure MakeEdgePerio; override;
+       procedure MakeEdgeMirro; override;
      end;
 
      //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TGridArray1D<_TItem_>
@@ -90,6 +95,9 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        property GridX                    :Integer read   _CountX write SetCountX;
        property BricN                    :Integer read GetBricX  write SetBricX ;
        property BricX                    :Integer read GetBricX  write SetBricX ;
+       ///// メソッド
+       procedure MakeEdgePerio; override;
+       procedure MakeEdgeMirro; override;
      end;
 
      //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TGridMap1D<_TItem_>
@@ -120,7 +128,7 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        ///// メソッド
        function Interp( const I_:Single ) :_TItem_; overload; virtual;
        function InterpPos( const Pos_:Single ) :_TItem_; overload; virtual;
-       function AddLast( const Pos_:Single; const Val_:_TItem_ ) :Integer; overload;
+       function AddTail( const Pos_:Single; const Val_:_TItem_ ) :Integer; overload;
        function Insert( const PV_:TPosval1D<_TItem_> ) :Integer; overload;
        function Insert( const Pos_:Single; const Val_:_TItem_ ) :Integer; overload;
      end;
@@ -233,15 +241,24 @@ begin
      A := Array0_;  Array0_ := Array1_;  Array1_ := A;
 end;
 
-procedure TArray1D<_TItem_>.MakeEdgeLoop;
+procedure TArray1D<_TItem_>.MakeEdgeExten;
 var
-   X :Integer;
+   M, H, X :Integer;
 begin
-     for X := -_MarginX to                 -1 do Item[ X ] := Item[ X + _CountX ];
-     for X :=  _CountX  to _CountX+_MarginX-1 do Item[ X ] := Item[ X - _CountX ];
+     {                                    H
+                                          |
+         -3  -2  -1  00  +1  +2  +3  +4  +5  +6  +7  +8
+         ○─○─○─●─●─●─●─●─●─○─○─○
+         00  00  00  ・  ・  ・  ・  ・  ・  +5  +5  +5   }
+
+     M := _MarginX ;
+     H := _CountX-1;
+
+     for X := 0-M to 0-1 do Item[ X ] := Item[ 0 ];
+     for X := H+1 to H+M do Item[ X ] := Item[ H ];
 end;
 
-function TArray1D<_TItem_>.AddLast( const Item_:_TItem_ ) :Integer;
+function TArray1D<_TItem_>.AddTail( const Item_:_TItem_ ) :Integer;
 begin
      Result := _CountX;
 
@@ -269,6 +286,44 @@ begin
 end;
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
+
+/////////////////////////////////////////////////////////////////////// メソッド
+
+procedure TBricArray1D<_TItem_>.MakeEdgePerio;
+var
+   M, N, H, X :Integer;
+begin
+     {                                    H   N
+                                          |   |
+         -3  -2  -1  00  +1  +2  +3  +4  +5  +6  +7  +8
+       ┠─╂─╂─┣━╋━╋━╋━╋━╋━┫─╂─╂─┨
+         +3  +4  +5  ・  ・  ・  ・  ・  ・  00  +1  +2   }
+
+     M := _MarginX ;
+     N := _CountX  ;
+     H := _CountX-1;
+
+     for X := 0-M to 0-1 do Item[ X ] := Item[ X + N ];
+     for X := H+1 to H+M do Item[ X ] := Item[ X - N ];
+end;
+
+procedure TBricArray1D<_TItem_>.MakeEdgeMirro;
+var
+   M, N, H, X :Integer;
+begin
+     {                                    H   N
+                                          |   |
+         -3  -2  -1  00  +1  +2  +3  +4  +5  +6  +7  +8
+       ┠─╂─╂─┣━╋━╋━╋━╋━╋━┫─╂─╂─┨
+         +2  +1  00  ・  ・  ・  ・  ・  ・  +5  +4  +3   }
+
+     M := _MarginX ;
+     N := _CountX  ;
+     H := _CountX-1;
+
+     for X := 0-M to 0-1 do Item[ X ] := Item[ 0 - X - 1 ];
+     for X := H+1 to H+M do Item[ X ] := Item[ H - X + N ];
+end;
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TGridArray1D<_TItem_>
 
@@ -315,6 +370,40 @@ end;
 
 /////////////////////////////////////////////////////////////////////// メソッド
 
+procedure TGridArray1D<_TItem_>.MakeEdgePerio;
+var
+   M, H, X :Integer;
+begin
+     {                                      H
+                                            |
+       -3  -2  -1  00  +1  +2  +3  +4  +5  +6  +7  +8  +9
+       ┠─╂─╂─┣━╋━╋━╋━╋━╋━┫─╂─╂─┨
+       +3  +4  +5  ・  ・  ・  ・  ・  ・  00  +1  +2  +3 }
+
+     M := _MarginX ;
+     H := _CountX-1;
+
+     for X := 0-M to 0-1 do Item[ X ] := Item[ X + H ];
+     for X := H+0 to H+M do Item[ X ] := Item[ X - H ];
+end;
+
+procedure TGridArray1D<_TItem_>.MakeEdgeMirro;
+var
+   M, H, X :Integer;
+begin
+     {                                      H
+                                            |
+       -3  -2  -1  00  +1  +2  +3  +4  +5  +6  +7  +8  +9
+       ┠─╂─╂─┣━╋━╋━╋━╋━╋━┫─╂─╂─┨
+       +3  +2  +1  ・  ・  ・  ・  ・  ・  ・  +5  +4  +3 }
+
+     M := _MarginX ;
+     H := _CountX-1;
+
+     for X := 0-M to 0-1 do Item[ X ] := Item[ -X       ];
+     for X := H+1 to H+M do Item[ X ] := Item[ -X + 2*H ];
+end;
+
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TGridMap1D<_TItem_>
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& private
@@ -345,9 +434,9 @@ end;
 
 /////////////////////////////////////////////////////////////////////// メソッド
 
-function TIrreMap1D<_TItem_>.AddLast( const Pos_:Single; const Val_:_TItem_ ) :Integer;
+function TIrreMap1D<_TItem_>.AddTail( const Pos_:Single; const Val_:_TItem_ ) :Integer;
 begin
-     Result := AddLast( TPosval1D<_TItem_>.Create( Pos_, Val_ ) );
+     Result := AddTail( TPosval1D<_TItem_>.Create( Pos_, Val_ ) );
 end;
 
 //------------------------------------------------------------------------------

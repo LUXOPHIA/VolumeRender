@@ -20,9 +20,7 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        function InterpPos( const G0_,G1_,G2_,G3_:TPosval1D<Single>; const Pos_:Single ) :Single; overload; override;
      public
        ///// メソッド
-       function Interp( const I_:Single ) :Single; override;                    {ToDo: ジェネリックスのエラーバグ対策}
-       function InterpPos( const Pos_:Single ) :Single; override;               {ToDo: ジェネリックスのエラーバグ対策}
-       procedure MakeEdgeExtend;
+       procedure MakeEdgeExtra;
      end;
 
 //const //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【定数】
@@ -60,37 +58,53 @@ end;
 
 /////////////////////////////////////////////////////////////////////// メソッド
 
-function TSingleIrreMap1D.Interp( const I_:Single ) :Single;
-begin
-     Result := inherited;
-end;
-
-function TSingleIrreMap1D.InterpPos( const Pos_:Single ) :Single;
-begin
-     Result := inherited;
-end;
-
-procedure TSingleIrreMap1D.MakeEdgeExtend;
+procedure TSingleIrreMap1D.MakeEdgeExtra;
 var
-   G0, G1, G2 :TPosval1D<Single>;
+   H, X :Integer;
+   G0, G1, Gd, G :TPosval1D<Single>;
 begin
-     G1 := Item[ 0 ];
-     G2 := Item[ 1 ];
-     with G0 do
-     begin
-          Pos := 2 * G1.Pos - G2.Pos;
-          Val := 2 * G1.Val - G2.Val;
-     end;
-     Grid[ -1 ] := G0;
+     {                                      H
+                                            |
+       -3  -2  -1  00  +1  +2  +3  +4  +5  +6  +7  +8  +9
+       ┠─╂─╂─┣━╋━╋━╋━╋━╋━┫─╂─╂─┨
+       -3  -2  -1  ・  ・  ・  ・  ・  ・  ・  +7  +8  +9
+                   G0  G1              G0  G1             }
 
-     G0 := Item[ BricN-1 ];
-     G1 := Item[ BricN   ];
-     with G2 do
+     H := BricN;
+
+     G0 := Item[ 0 ];
+     G1 := Item[ 1 ];
+
+     Gd.Pos := G0.Pos - G1.Pos;
+     Gd.Val := G0.Val - G1.Val;
+
+     for X := 1 to _MarginX do
      begin
-          Pos := 2 * G1.Pos - G0.Pos;
-          Val := 2 * G1.Val - G0.Val;
+          with G do
+          begin
+               Pos := G0.Pos + X * Gd.Pos;
+               Val := G0.Val + X * Gd.Val;
+          end;
+
+          Grid[ 0-X ] := G;
      end;
-     Grid[ BricN+1 ] := G2;
+
+     G0 := Item[ H-1 ];
+     G1 := Item[ H   ];
+
+     Gd.Pos := G1.Pos - G0.Pos;
+     Gd.Val := G1.Val - G0.Val;
+
+     for X := 1 to _MarginX do
+     begin
+          with G do
+          begin
+               Pos := G1.Pos + X * Gd.Pos;
+               Val := G1.Val + X * Gd.Pos;
+          end;
+
+          Grid[ H+X ] := G;
+     end;
 end;
 
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【ルーチン】
