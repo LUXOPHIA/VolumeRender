@@ -231,8 +231,11 @@ var
    W, H, W2, H2 :Single;
    R :TRectF;
 begin
-     W := TextWidth ( Text_ );
-     H := TextHeight( Text_ );
+     R := TRectF.Create( 0, 0, Single.MaxValue, Single.MaxValue );
+     MeasureText( R, Text_, False, [], TTextAlign.Leading, TTextAlign.Leading );
+
+     W := R.Right ;
+     H := R.Bottom;
 
      with R do
      begin
