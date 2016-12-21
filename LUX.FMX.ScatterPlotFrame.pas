@@ -88,6 +88,7 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        destructor Destroy; override;
        ///// プロパティ
        property Margin                     :Single      read   _Margin    write SetMargin   ;
+       property Area                       :TRectF      read   _Area                        ;
        property MinX                       :Single      read   _MinX      write SetMinX     ;
        property MaxX                       :Single      read   _MaxX      write SetMaxX     ;
        property MinY                       :Single      read   _MinY      write SetMinY     ;
