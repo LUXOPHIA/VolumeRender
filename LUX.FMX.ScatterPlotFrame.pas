@@ -46,26 +46,26 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        _ScaleN    :Integer;
        _FontColor :TAlphaColor;
        ///// アクセス
-       procedure SetMargin( const Margin_:Single );
-       procedure SetMinX( const MinX_:Single );
-       procedure SetMaxX( const MaxX_:Single );
-       procedure SetMinY( const MinY_:Single );
-       procedure SetMaxY( const MaxY_:Single );
-       procedure SetBackColor( const BackColor_:TAlphaColor );
-       procedure SetAreaColor( const AreaColor_:TAlphaColor );
-       function GetPlot( const I_:Integer ) :TSingle2D;
-       procedure SetPlot( const I_:Integer; const Plot_:TSingle2D );
-       procedure SetPlotsN( const PlotsN_:Integer );
-       procedure SetPlotSize( const PlotSize_:Single );
-       procedure SetPlotColor( const PlotColor_:TAlphaColor );
-       procedure SetFocus( const Focus_:Integer );
-       procedure SetHover( const Hover_:Integer );
-       function GetScaleX( const I_:Integer ) :TScaleLine;
-       procedure SetScaleX( const I_:Integer; const ScaleX_:TScaleLine );
-       function GetScaleY( const I_:Integer ) :TScaleLine;
-       procedure SetScaleY( const I_:Integer; const ScaleY_:TScaleLine );
-       procedure SetScaleN( const ScaleN_:Integer );
-       procedure SetFontColor( const FontColor_:TAlphaColor );
+       procedure SetMargin( const Margin_:Single ); virtual;
+       procedure SetMinX( const MinX_:Single ); virtual;
+       procedure SetMaxX( const MaxX_:Single ); virtual;
+       procedure SetMinY( const MinY_:Single ); virtual;
+       procedure SetMaxY( const MaxY_:Single ); virtual;
+       procedure SetBackColor( const BackColor_:TAlphaColor ); virtual;
+       procedure SetAreaColor( const AreaColor_:TAlphaColor ); virtual;
+       function GetPlot( const I_:Integer ) :TSingle2D; virtual;
+       procedure SetPlot( const I_:Integer; const Plot_:TSingle2D ); virtual;
+       procedure SetPlotsN( const PlotsN_:Integer ); virtual;
+       procedure SetPlotSize( const PlotSize_:Single ); virtual;
+       procedure SetPlotColor( const PlotColor_:TAlphaColor ); virtual;
+       procedure SetFocus( const Focus_:Integer ); virtual;
+       procedure SetHover( const Hover_:Integer ); virtual;
+       function GetScaleX( const I_:Integer ) :TScaleLine; virtual;
+       procedure SetScaleX( const I_:Integer; const ScaleX_:TScaleLine ); virtual;
+       function GetScaleY( const I_:Integer ) :TScaleLine; virtual;
+       procedure SetScaleY( const I_:Integer; const ScaleY_:TScaleLine ); virtual;
+       procedure SetScaleN( const ScaleN_:Integer ); virtual;
+       procedure SetFontColor( const FontColor_:TAlphaColor ); virtual;
        ///// メソッド
        procedure MouseDown( Button_:TMouseButton; Shift_:TShiftState; X_,Y_:Single ); override;
        procedure MouseMove( Shift_:TShiftState; X_,Y_:Single); override;
@@ -76,8 +76,8 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        function PosToScr( const P_:TSingle2D ) :TPointF;
        procedure DrawPlots;
        procedure DrawAxis;
-       procedure DrawGridX( const Interval_:Single );
-       procedure DrawGridY( const Interval_:Single );
+       procedure DrawScaleX( const Interval_:Single );
+       procedure DrawScaleY( const Interval_:Single );
        procedure DrawValuesX( const Interval_:Single; const Digits_:Integer );
        procedure DrawValuesY( const Interval_:Single; const Digits_:Integer );
        ///// プロパティ
@@ -311,7 +311,7 @@ begin
                     Stroke.Thickness := Thick;
                     Stroke.Color     := Color;
 
-                    DrawGridX( Scale );
+                    DrawScaleX( Scale );
                end;
 
                with _ScaleY[ I ] do
@@ -319,7 +319,7 @@ begin
                     Stroke.Thickness := Thick;
                     Stroke.Color     := Color;
 
-                    DrawGridY( Scale );
+                    DrawScaleY( Scale );
                end;
           end;
 
@@ -425,7 +425,7 @@ end;
 
 //------------------------------------------------------------------------------
 
-procedure TScatterPlotFrame.DrawGridX( const Interval_ :Single );
+procedure TScatterPlotFrame.DrawScaleX( const Interval_ :Single );
 var
    X0, X1, X :Integer;
    P0, P1 :TSingle2D;
@@ -444,7 +444,7 @@ begin
      end;
 end;
 
-procedure TScatterPlotFrame.DrawGridY( const Interval_ :Single );
+procedure TScatterPlotFrame.DrawScaleY( const Interval_ :Single );
 var
    Y0, Y1, Y :Integer;
    P0, P1 :TSingle2D;
