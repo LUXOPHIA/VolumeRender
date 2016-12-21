@@ -25,6 +25,7 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
      TScatterPlotFrame = class(TFrame)
      private
+     protected
        { private 宣言 }
        _Margin    :Single;
        _Area      :TRectF;
@@ -66,6 +67,11 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        procedure SetScaleN( const ScaleN_:Integer );
        procedure SetFontColor( const FontColor_:TAlphaColor );
        ///// メソッド
+       procedure MouseDown( Button_:TMouseButton; Shift_:TShiftState; X_,Y_:Single ); override;
+       procedure MouseMove( Shift_:TShiftState; X_,Y_:Single); override;
+       procedure MouseUp( Button_:TMouseButton; Shift_:TShiftState; X_,Y_:Single ); override;
+       procedure Paint; override;
+       procedure Resize; override;
        function ScrToPos( const S_:TPointF ) :TSingle2D;
        function PosToScr( const P_:TSingle2D ) :TPointF;
        procedure DrawPlots;
@@ -76,12 +82,6 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        procedure DrawValuesY( const Interval_:Single; const Digits_:Integer );
        ///// プロパティ
        property Hover :Integer read _Hover write SetHover;
-     protected
-       procedure MouseDown( Button_:TMouseButton; Shift_:TShiftState; X_,Y_:Single ); override;
-       procedure MouseMove( Shift_:TShiftState; X_,Y_:Single); override;
-       procedure MouseUp( Button_:TMouseButton; Shift_:TShiftState; X_,Y_:Single ); override;
-       procedure Paint; override;
-       procedure Resize; override;
      public
        { public 宣言 }
        constructor Create( AOwner_:TComponent ); override;
@@ -134,6 +134,8 @@ end;
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TScatterPlotFrame
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& private
+
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& protected
 
 /////////////////////////////////////////////////////////////////////// アクセス
 
@@ -255,6 +257,110 @@ begin
 end;
 
 /////////////////////////////////////////////////////////////////////// メソッド
+
+procedure TScatterPlotFrame.MouseDown( Button_:TMouseButton; Shift_:TShiftState; X_,Y_:Single );
+begin
+     inherited;
+
+     Focus := FindNearPlot( TPointF.Create( X_, Y_ ) );
+end;
+
+procedure TScatterPlotFrame.MouseMove( Shift_:TShiftState; X_,Y_:Single );
+begin
+     inherited;
+
+     Hover := FindNearPlot( TPointF.Create( X_, Y_ ) );
+end;
+
+procedure TScatterPlotFrame.MouseUp( Button_:TMouseButton; Shift_:TShiftState; X_,Y_:Single );
+begin
+     inherited;
+
+end;
+
+//------------------------------------------------------------------------------
+
+procedure TScatterPlotFrame.Paint;
+var
+   I :Integer;
+begin
+     inherited;
+
+     with Canvas do
+     begin
+          Stroke.Kind := TBrushKind.Solid;
+          Fill  .Kind := TBrushKind.Solid;
+
+          //////////
+
+          Clear( _BackColor );
+
+          //////////
+
+          Fill.Color := _AreaColor;
+
+          FillRect( _Area, 0, 0, [], 1 );
+
+          //////////
+
+          for I := _ScaleN-1 downto 0 do
+          begin
+               with _ScaleX[ I ] do
+               begin
+                    Stroke.Thickness := Thick;
+                    Stroke.Color     := Color;
+
+                    DrawGridX( Scale );
+               end;
+
+               with _ScaleY[ I ] do
+               begin
+                    Stroke.Thickness := Thick;
+                    Stroke.Color     := Color;
+
+                    DrawGridY( Scale );
+               end;
+          end;
+
+          //////////
+
+          with Stroke do
+          begin
+               Thickness := 2.0;
+               Color     := TAlphaColors.White;
+          end;
+
+          DrawAxis;
+
+          //////////
+
+          Font.Size := 15;
+
+          Fill.Color := _FontColor;
+
+          DrawValuesX( _ScaleX[0].Scale, 1 );
+          DrawValuesY( _ScaleY[0].Scale, 1 );
+
+          //////////
+
+          with Stroke do
+          begin
+               Thickness := 2;
+               Color     := TAlphaColors.Lime;
+          end;
+
+          DrawPlots;
+     end;
+end;
+
+procedure TScatterPlotFrame.Resize;
+begin
+     inherited;
+
+     _Area := TRectF.Create( _Margin, _Margin, Width-_Margin, Height-_Margin );
+end;
+
+//------------------------------------------------------------------------------
 
 function TScatterPlotFrame.ScrToPos( const S_:TPointF ) :TSingle2D;
 begin
@@ -410,110 +516,6 @@ begin
                DrawText( T, S, TTextAlign.Trailing, TTextAlign.Center );
           end;
      end;
-end;
-
-//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& protected
-
-procedure TScatterPlotFrame.MouseDown( Button_:TMouseButton; Shift_:TShiftState; X_,Y_:Single );
-begin
-     inherited;
-
-     Focus := FindNearPlot( TPointF.Create( X_, Y_ ) );
-end;
-
-procedure TScatterPlotFrame.MouseMove( Shift_:TShiftState; X_,Y_:Single );
-begin
-     inherited;
-
-     Hover := FindNearPlot( TPointF.Create( X_, Y_ ) );
-end;
-
-procedure TScatterPlotFrame.MouseUp( Button_:TMouseButton; Shift_:TShiftState; X_,Y_:Single );
-begin
-     inherited;
-
-end;
-
-//------------------------------------------------------------------------------
-
-procedure TScatterPlotFrame.Paint;
-var
-   I :Integer;
-begin
-     inherited;
-
-     with Canvas do
-     begin
-          Stroke.Kind := TBrushKind.Solid;
-          Fill  .Kind := TBrushKind.Solid;
-
-          //////////
-
-          Clear( _BackColor );
-
-          //////////
-
-          Fill.Color := _AreaColor;
-
-          FillRect( _Area, 0, 0, [], 1 );
-
-          //////////
-
-          for I := _ScaleN-1 downto 0 do
-          begin
-               with _ScaleX[ I ] do
-               begin
-                    Stroke.Thickness := Thick;
-                    Stroke.Color     := Color;
-
-                    DrawGridX( Scale );
-               end;
-
-               with _ScaleY[ I ] do
-               begin
-                    Stroke.Thickness := Thick;
-                    Stroke.Color     := Color;
-
-                    DrawGridY( Scale );
-               end;
-          end;
-
-          //////////
-
-          with Stroke do
-          begin
-               Thickness := 2.0;
-               Color     := TAlphaColors.White;
-          end;
-
-          DrawAxis;
-
-          //////////
-
-          Font.Size := 15;
-
-          Fill.Color := _FontColor;
-
-          DrawValuesX( _ScaleX[0].Scale, 1 );
-          DrawValuesY( _ScaleY[0].Scale, 1 );
-
-          //////////
-
-          with Stroke do
-          begin
-               Thickness := 2;
-               Color     := TAlphaColors.Lime;
-          end;
-
-          DrawPlots;
-     end;
-end;
-
-procedure TScatterPlotFrame.Resize;
-begin
-     inherited;
-
-     _Area := TRectF.Create( _Margin, _Margin, Width-_Margin, Height-_Margin );
 end;
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
