@@ -6,7 +6,7 @@ uses System.Classes, System.UITypes, System.Generics.Collections,
      System.Types, System.Math.Vectors,
      FMX.Types3D, FMX.MaterialSources,
      Winapi.D3DCommon, Winapi.D3D11Shader, Winapi.D3DCompiler,
-     LUX;
+     LUX, LUX.FMX.Types3D;
 
 type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【型】
 
@@ -21,6 +21,7 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
            TShaderVarColorF       = class;
            TShaderVarMatrix3D     = class;
            TShaderVarTexture      = class;
+           TShaderVarTexture3D    = class;
          TShaderVarLight          = class;
      TShaderSource                = class;
        TShaderSourceV             = class;
@@ -184,6 +185,21 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
      //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TShaderVarTexture
 
      TShaderVarTexture = class( TShaderVarPrim<TTexture> )
+     private
+     protected
+       ///// アクセス
+       function GetKind :TContextShaderVariableKind; override;
+       function GetSize :Integer; override;
+     public
+       ///// メソッド
+       procedure SendVar( const Context_:TContext3D ); override;
+       function GetVars( var I_,T_:Integer; const U_:Byte ) :TContextShaderVariables; override;
+       function GetSource( var C_:Integer; var T_:Integer ) :String; override;
+     end;
+
+     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TShaderVarTexture3D
+
+     TShaderVarTexture3D = class( TShaderVarPrim<TTexture3D> )
      private
      protected
        ///// アクセス
@@ -664,6 +680,47 @@ end;
 function TShaderVarTexture.GetSource( var C_:Integer; var T_:Integer ) :String;
 begin
      Result := 'Texture2D<float4> ' + _Name + ' : register( t' + t_.ToString + ' );' + CRLF;
+
+     Inc( t_, 1 );
+end;
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TShaderVarTexture3D
+
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& private
+
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& protected
+
+/////////////////////////////////////////////////////////////////////// アクセス
+
+function TShaderVarTexture3D.GetKind :TContextShaderVariableKind;
+begin
+     Result := TContextShaderVariableKind.Texture;
+end;
+
+function TShaderVarTexture3D.GetSize :Integer;
+begin
+     Result := 0;
+end;
+
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
+
+/////////////////////////////////////////////////////////////////////// メソッド
+
+function TShaderVarTexture3D.GetVars( var I_,T_:Integer; const U_:Byte ) :TContextShaderVariables;
+begin
+     Result := [ TContextShaderVariable.Create( Name, Kind, T_, U_ * Size ) ];
+
+     Inc( T_, 1 );
+end;
+
+procedure TShaderVarTexture3D.SendVar( const Context_:TContext3D );
+begin
+     Context_.SetShaderVariable( _Name, _Value );
+end;
+
+function TShaderVarTexture3D.GetSource( var C_:Integer; var T_:Integer ) :String;
+begin
+     Result := 'Texture3D<float4> ' + _Name + ' : register( t' + t_.ToString + ' );' + CRLF;
 
      Inc( t_, 1 );
 end;
