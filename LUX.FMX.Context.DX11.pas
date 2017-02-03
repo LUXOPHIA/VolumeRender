@@ -671,8 +671,8 @@ procedure TLuxDX11Context.SetTexture3D( const Unit_:Integer; const Texture_:TTex
 var
    Tex :ID3D11Texture3D;
    Desc :TD3D11_SAMPLER_DESC;
-   RV0 :ID3D11ShaderResourceView;
-   SS0 :ID3D11SamplerState;
+   OldResourceView :ID3D11ShaderResourceView;
+   OldSampleState :ID3D11SamplerState;
 begin
      SaveClearFPUState;
      try
@@ -690,7 +690,7 @@ begin
              Desc.MinLOD         := -Single.MaxValue;
              Desc.MaxLOD         := +Single.MaxValue;
 
-             SS0 := _SampleStates[ Unit_ ];
+             OldSampleState := _SampleStates[ Unit_ ];
 
              _SampleStates[ Unit_ ] := nil;
 
@@ -698,7 +698,7 @@ begin
              begin
                   SharedContext.PSSetSamplers( Unit_, 1, _SampleStates[ Unit_ ] );
 
-                  SS0 := nil;
+                  OldSampleState := nil;
              end;
         end;
 
@@ -706,9 +706,9 @@ begin
         begin
              Tex := ResourceToTexture3D( Texture_.Handle );
         end
-        else RunError;  //Tex := BlankTextur
+        else RunError;  //Tex := BlankTexture
 
-        RV0 := _ResourceViews[ Unit_ ];
+        OldResourceView := _ResourceViews[ Unit_ ];
 
         _ResourceViews[ Unit_ ] := nil;
 
@@ -716,7 +716,7 @@ begin
         begin
              SharedContext.PSSetShaderResources( Unit_, 1, _ResourceViews[ Unit_ ] );
 
-             RV0 := nil;
+             OldResourceView := nil;
         end;
      finally
             RestoreFPUState;
