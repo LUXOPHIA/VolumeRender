@@ -706,7 +706,7 @@ begin
         begin
              Tex := ResourceToTexture3D( Texture_.Handle );
         end
-        else RunError;  //Tex := BlankTexture
+        else Assert( False, 'Tex := BlankTexture' );
 
         OldResourceView := _ResourceViews[ Unit_ ];
 
