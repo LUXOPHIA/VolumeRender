@@ -206,6 +206,8 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        function GetKind :TContextShaderVariableKind; override;
        function GetSize :Integer; override;
      public
+       constructor Create( const Name_:String );
+       destructor Destroy; override;
        ///// メソッド
        procedure SendVar( const Context_:TContext3D ); override;
        function GetVars( var I_,T_:Integer; const U_:Byte ) :TContextShaderVariables; override;
@@ -689,6 +691,20 @@ end;
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& private
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& protected
+
+constructor TShaderVarTexture3D.Create( const Name_:String );
+begin
+     inherited;
+
+     _Value := TTexture3DBGRA.Create;
+end;
+
+destructor TShaderVarTexture3D.Destroy;
+begin
+     _Value.Free;
+
+     inherited;
+end;
 
 /////////////////////////////////////////////////////////////////////// アクセス
 
