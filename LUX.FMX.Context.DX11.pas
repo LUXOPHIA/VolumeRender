@@ -151,7 +151,7 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【型
        class procedure DoFinalizeTexture( const Texture_:TTexture ); override;
        class procedure DoUpdateTexture( const Texture_:TTexture; const Bits_:Pointer; const Pitch_:Integer ); override;
        class procedure DoUpdateTexture2D( const Texture_:TTexture; const Bits_:Pointer; const Pitch_:Integer );
-       class procedure DoUpdateTexture3D( const Texture_:TTexture3D; const Bits_:Pointer; const Pitch_:Integer );
+       class procedure DoUpdateTexture3D( const Texture_:TTexture3D );
        { bitmap }
        class function DoBitmapToTexture( const Bitmap_:TBitmap ): TTexture; override;
        { shaders }
@@ -1787,7 +1787,7 @@ end;
 
 class procedure TLuxDX11Context.DoUpdateTexture( const Texture_:TTexture; const Bits_:Pointer; const Pitch_:Integer );
 begin
-     if Texture_ is TTexture3D then DoUpdateTexture3D( Texture_ as TTexture3D, Bits_, Pitch_ )
+     if Texture_ is TTexture3D then DoUpdateTexture3D( Texture_ as TTexture3D )
                                else DoUpdateTexture2D( Texture_, Bits_, Pitch_ );
 end;
 
@@ -1862,10 +1862,10 @@ begin
      end;
 end;
 
-class procedure TLuxDX11Context.DoUpdateTexture3D( const Texture_:TTexture3D; const Bits_:Pointer; const Pitch_:Integer );
+class procedure TLuxDX11Context.DoUpdateTexture3D( const Texture_:TTexture3D );
 var
    Mapped :D3D11_MAPPED_SUBRESOURCE;
-   I, Z, BytesToCopy :UInt;
+   Y, Z :UInt;
    CopyBuffer, Tex :ID3D11Texture3D;
    Desc :TD3D11_TEXTURE3D_DESC;
 begin
@@ -1892,13 +1892,18 @@ begin
 
                   if Succeeded( SharedContext.Map( CopyBuffer, 0, D3D11_MAP_WRITE, 0, Mapped ) ) then
                   try
-                     BytesToCopy := Min( Pitch_, Mapped.RowPitch );
-
-                     for Z := 0 to Texture_.Depth - 1 do
+                     with Texture_.Map do
                      begin
-                          for I := 0 to Texture_.Height - 1 do Move( PByteArray( Bits_        )[ UInt( Pitch_ ) * ( UInt( Texture_.Height ) * Z + I ) ],
-                                                                     PByteArray( Mapped.pData )[ Mapped.DepthPitch * Z + Mapped.RowPitch * I ],
-                                                                     BytesToCopy );
+                          for Z := 0 to CountZ-1 do
+                          begin
+                               for Y := 0 to CountY-1 do
+                               begin
+                                    Move( Lines[ Y, Z ]^,
+                                          PByteArray( Mapped.pData )[ Mapped.DepthPitch * Z
+                                                                    + Mapped.RowPitch   * Y ],
+                                          LineSize );
+                               end;
+                          end;
                      end;
                   finally
                          SharedContext.Unmap( CopyBuffer, 0 );
@@ -1910,13 +1915,18 @@ begin
              begin
                   if Succeeded( SharedContext.Map( Tex, 0, D3D11_MAP_WRITE_DISCARD, 0, Mapped ) ) then
                   try
-                     BytesToCopy := Min( Pitch_, Mapped.RowPitch );
-
-                     for Z := 0 to Texture_.Depth - 1 do
+                     with Texture_.Map do
                      begin
-                          for I := 0 to Texture_.Height - 1 do Move( PByteArray( Bits_        )[ UInt( Pitch_ ) * ( UInt( Texture_.Height ) * Z + I ) ],
-                                                                     PByteArray( Mapped.pData )[ Mapped.DepthPitch * Z + Mapped.RowPitch * I ],
-                                                                     BytesToCopy );
+                          for Z := 0 to CountZ-1 do
+                          begin
+                               for Y := 0 to CountY-1 do
+                               begin
+                                    Move( Lines[ Y, Z ]^,
+                                          PByteArray( Mapped.pData )[ Mapped.DepthPitch * Z
+                                                                    + Mapped.RowPitch   * Y ],
+                                          LineSize );
+                               end;
+                          end;
                      end;
                   finally
                          SharedContext.Unmap( Tex, 0 );
