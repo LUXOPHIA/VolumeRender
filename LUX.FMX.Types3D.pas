@@ -2,9 +2,9 @@
 
 interface //#################################################################### ■
 
-uses System.SysUtils, System.Messaging,
+uses System.Messaging,
      FMX.Types3D,
-     LUX;
+     LUX, LUX.Lattice.T3;
 
 type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【型】
 
@@ -19,9 +19,9 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        _ContextLostId              :Integer;
        _ContextResetId             :Integer;
        _RequireInitializeAfterLost :Boolean;
-       _Bits                       :TBytes;
      protected
-       _Depth :Integer;
+       _Map    :TArray3D;
+       _Depth  :Integer;
        ///// アクセス
        procedure SetDepth( const Depth_:Integer );
        ///// メソッド
@@ -31,14 +31,25 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        constructor Create; override;
        destructor Destroy; override;
        ///// プロパティ
-       property Depth :Integer read _Depth write SetDepth;
+       property Map   :TArray3D read _Map                 ;
+       property Depth :Integer  read _Depth write SetDepth;
        ///// メソッド
        procedure SetSize( const Width_,Height_,Depth_:Integer );
        function IsEmpty :Boolean;
-       procedure UpdateTexture( const Bits_:Pointer; const Pitch_:Integer );
+       procedure UpdateTexture;
      end;
 
-     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TTexture3D
+     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TTexture3DBGRA
+
+     TTexture3DBGRA = class( TTexture3D )
+     private
+     protected
+     public
+       constructor Create; override;
+       destructor Destroy; override;
+       ///// プロパティ
+
+     end;
 
 //const //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【定数】
 
@@ -47,6 +58,8 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【ルーチン】
 
 implementation //############################################################### ■
+
+uses System.UITypes, FMX.Types;
 
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【レコード】
 
@@ -87,7 +100,7 @@ begin
 
           _RequireInitializeAfterLost := False;
 
-         UpdateTexture( @_Bits[0], Width * BytesPerPixel );
+          UpdateTexture;
      end;
 end;
 
@@ -123,9 +136,33 @@ begin
      _Depth := Depth_;
 end;
 
-procedure TTexture3D.UpdateTexture( const Bits_:Pointer; const Pitch_:Integer );
+procedure TTexture3D.UpdateTexture;
 begin
-     TContextManager.DefaultContextClass.UpdateTexture( Self, Bits_, Pitch_ );
+     if Assigned( _Map ) then TContextManager.DefaultContextClass.UpdateTexture( Self, _Map.Lines[ 0, 0 ], _Map.StepY );
+end;
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TTexture3DBGRA
+
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& private
+
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& protected
+
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
+
+constructor TTexture3DBGRA.Create;
+begin
+     inherited;
+
+     _Map := TArray3D<TAlphaColor>.Create;
+
+     PixelFormat := TPixelFormat.BGRA;
+end;
+
+destructor TTexture3DBGRA.Destroy;
+begin
+     _Map.Free;
+
+     inherited;
 end;
 
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【ルーチン】
