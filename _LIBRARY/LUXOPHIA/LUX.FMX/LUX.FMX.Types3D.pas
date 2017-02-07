@@ -44,21 +44,39 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        procedure UpdateTexture;
      end;
 
-     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TTexture3DBGRA
+     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TTexture3D<_TPixel_>
 
-     TTexture3DBGRA = class( TTexture3D )
+     TTexture3D<_TPixel_:record> = class( TTexture3D )
      private
      protected
        ///// アクセス
-       function GetMap :TArray3D<TAlphaColor>;
-       function GetPixels( const X_,Y_,Z_:Integer ) :TAlphaColor;
-       procedure SetPixels( const X_,Y_,Z_:Integer; const Pixel_:TAlphaColor );
+       function GetMap :TArray3D<_TPixel_>;
+       function GetPixels( const X_,Y_,Z_:Integer ) :_TPixel_;
+       procedure SetPixels( const X_,Y_,Z_:Integer; const Pixel_:_TPixel_ );
      public
        constructor Create; override;
        destructor Destroy; override;
        ///// プロパティ
-       property Map                              :TArray3D<TAlphaColor> read GetMap                   ;
-       property Pixels[ const X_,Y_,Z_:Integer ] :TAlphaColor           read GetPixels write SetPixels;
+       property Map                              :TArray3D<_TPixel_> read GetMap                   ;
+       property Pixels[ const X_,Y_,Z_:Integer ] :_TPixel_           read GetPixels write SetPixels;
+     end;
+
+     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TTexture3DBGRA
+
+     TTexture3DBGRA = class( TTexture3D<TAlphaColor> )
+     private
+     protected
+     public
+       constructor Create; override;
+     end;
+
+     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TTexture3DRGBA32F
+
+     TTexture3DRGBA32F = class( TTexture3D<TAlphaColorF> )
+     private
+     protected
+     public
+       constructor Create; override;
      end;
 
 //const //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【定数】
@@ -173,28 +191,50 @@ begin
      if Assigned( _Map ) then TContextManager.DefaultContextClass.UpdateTexture( Self, _Map.Lines[ 0, 0 ], _Map.StepY );
 end;
 
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TTexture3DBGRA
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TTexture3D<_TPixel_>
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& private
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& protected
 
-function TTexture3DBGRA.GetMap :TArray3D<TAlphaColor>;
+function TTexture3D<_TPixel_>.GetMap :TArray3D<_TPixel_>;
 begin
-     Result := _Map as TArray3D<TAlphaColor>;
+     Result := _Map as TArray3D<_TPixel_>;
 end;
 
 //------------------------------------------------------------------------------
 
-function TTexture3DBGRA.GetPixels( const X_,Y_,Z_:Integer ) :TAlphaColor;
+function TTexture3D<_TPixel_>.GetPixels( const X_,Y_,Z_:Integer ) :_TPixel_;
 begin
      Result := Map[ X_, Y_, Z_ ];
 end;
 
-procedure TTexture3DBGRA.SetPixels( const X_,Y_,Z_:Integer; const Pixel_:TAlphaColor );
+procedure TTexture3D<_TPixel_>.SetPixels( const X_,Y_,Z_:Integer; const Pixel_:_TPixel_ );
 begin
      Map[ X_, Y_, Z_ ] := Pixel_;
 end;
+
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
+
+constructor TTexture3D<_TPixel_>.Create;
+begin
+     inherited;
+
+     _Map := TArray3D<_TPixel_>.Create;
+end;
+
+destructor TTexture3D<_TPixel_>.Destroy;
+begin
+     _Map.Free;
+
+     inherited;
+end;
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TTexture3DBGRA
+
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& private
+
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& protected
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
 
@@ -202,16 +242,22 @@ constructor TTexture3DBGRA.Create;
 begin
      inherited;
 
-     _Map := TArray3D<TAlphaColor>.Create;
-
      PixelFormat := TPixelFormat.BGRA;
 end;
 
-destructor TTexture3DBGRA.Destroy;
-begin
-     _Map.Free;
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TTexture3DRGBA32F
 
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& private
+
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& protected
+
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
+
+constructor TTexture3DRGBA32F.Create;
+begin
      inherited;
+
+     PixelFormat := TPixelFormat.RGBA32F;
 end;
 
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【ルーチン】
