@@ -1809,7 +1809,7 @@ begin
              begin
                   FillChar( Desc, SizeOf( D3D11_TEXTURE2D_DESC ), 0 );
 
-                  Desc.Format             := DXGI_FORMAT_B8G8R8A8_UNORM;
+                  Desc.Format             := TexturePixelFormatToDX( Texture_.PixelFormat ); //DXGI_FORMAT_B8G8R8A8_UNORM
                   Desc.Width              := Texture_.Width;
                   Desc.Height             := Texture_.Height;
                   Desc.MipLevels          := 1;
@@ -1879,7 +1879,7 @@ begin
              begin
                   FillChar( Desc, SizeOf( D3D11_TEXTURE3D_DESC ), 0 );
 
-                  Desc.Format         := DXGI_FORMAT_B8G8R8A8_UNORM;
+                  Desc.Format         := TexturePixelFormatToDX( Texture_.PixelFormat );
                   Desc.Width          := Texture_.Width;
                   Desc.Height         := Texture_.Height;
                   Desc.Depth          := Texture_.Depth;
