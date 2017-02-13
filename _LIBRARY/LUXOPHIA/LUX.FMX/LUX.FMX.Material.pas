@@ -247,7 +247,7 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        _Entry   :AnsiString;
        _Source  :TStringList;
        _Targets :TDictionary<TContextShaderArch,AnsiString>;
-       _Errors  :TDictionary<AnsiString,AnsiString>;
+       _Errors  :TDictionary<String,String>;
        ///// アクセス
        function GetKind :TContextShaderKind; virtual; abstract;
        procedure SetSource( Sender_:TObject );
@@ -261,7 +261,7 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        property Vars   :TShaderVars                        read   _Vars   write _Vars  ;
        property Entry  :AnsiString                         read   _Entry  write _Entry ;
        property Source :TStringList                        read   _Source              ;
-       property Errors :TDictionary<AnsiString,AnsiString> read   _Errors              ;
+       property Errors :TDictionary<String,String> read   _Errors              ;
        ///// メソッド
        procedure LoadFromFile( const Name_:String );
        procedure LoadFromStream( const Stream_:TStream );
@@ -849,7 +849,7 @@ begin
      _Source.OnChange := SetSource;
 
      _Targets := TDictionary<TContextShaderArch,AnsiString>.Create;
-     _Errors  := TDictionary<AnsiString,AnsiString>.Create;
+     _Errors  := TDictionary<String,String>.Create;
 end;
 
 destructor TShaderSource.Destroy;
@@ -909,12 +909,13 @@ end;
 
 procedure TShaderSource.Compile;
 var
-   S, N, T, M :AnsiString;
+   S, N, T :AnsiString;
    CSSs :array of TContextShaderSource;
    A :TContextShaderArch;
    H :HResult;
    B, E :ID3DBlob;
    Bs :TArray<Byte>;
+   M :String;
 begin
      TShaderManager.UnregisterShader( _Shader );
 
@@ -927,7 +928,7 @@ begin
 
      for A in _Targets.Keys do
      begin
-          T := _Targets.Items[ A ];
+          T := _Targets[ A ];
 
           H := D3DCompile( PAnsiChar( S )                ,
                            Length( S )                   ,
@@ -945,7 +946,7 @@ begin
           begin
                SetLength( Bs, B.GetBufferSize );
 
-               Move( B.GetBufferPointer^, Bs[0], B.GetBufferSize );
+               Move( B.GetBufferPointer^, Bs[ 0 ], B.GetBufferSize );
 
                CSSs := CSSs + [ TContextShaderSource.Create( A, Bs, GetVars( A ) ) ];
           end
@@ -953,7 +954,7 @@ begin
           begin
                SetString( M, PAnsiChar( E.GetBufferPointer ), E.GetBufferSize );
 
-               _Errors.Add( T, M );
+               _Errors.Add( String( T ), M );
           end;
      end;
 
