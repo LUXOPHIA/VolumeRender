@@ -1,0 +1,331 @@
+object Form1: TForm1
+  Left = 0
+  Top = 0
+  Caption = 'Texture3D'
+  ClientHeight = 666
+  ClientWidth = 840
+  Position = ScreenCenter
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  OnCreate = FormCreate
+  DesignerMasterStyle = 0
+  object TabControl1: TTabControl
+    Align = Client
+    Margins.Left = 10.000000000000000000
+    Margins.Top = 10.000000000000000000
+    Margins.Right = 10.000000000000000000
+    Margins.Bottom = 10.000000000000000000
+    Size.Width = 820.000000000000000000
+    Size.Height = 646.000000000000000000
+    Size.PlatformDefault = False
+    TabIndex = 0
+    TabOrder = 0
+    TabPosition = PlatformDefault
+    Sizes = (
+      820s
+      620s
+      820s
+      620s)
+    object TabItemV: TTabItem
+      CustomIcon = <
+        item
+        end>
+      IsSelected = True
+      Size.Width = 46.000000000000000000
+      Size.Height = 26.000000000000000000
+      Size.PlatformDefault = False
+      StyleLookup = ''
+      TabOrder = 0
+      Text = 'View'
+      ExplicitSize.cx = 70.000000000000000000
+      ExplicitSize.cy = 26.000000000000000000
+      object Viewport3D1: TViewport3D
+        Align = Client
+        Camera = Camera1
+        Color = claBlack
+        Margins.Left = 10.000000000000000000
+        Margins.Top = 10.000000000000000000
+        Margins.Right = 10.000000000000000000
+        Margins.Bottom = 10.000000000000000000
+        Size.Width = 800.000000000000000000
+        Size.Height = 600.000000000000000000
+        Size.PlatformDefault = False
+        UsingDesignCamera = False
+        OnMouseDown = Viewport3D1MouseDown
+        OnMouseMove = Viewport3D1MouseMove
+        OnMouseUp = Viewport3D1MouseUp
+        object Grid3D1: TGrid3D
+          Marks = 4.000000000000000000
+          Frequency = 1.000000000000000000
+          LineColor = x50505050
+          Cursor = 5
+          Position.Y = 10.010000228881840000
+          RotationAngle.X = 270.000000000000000000
+          Width = 100.000000000000000000
+          Height = 100.000000000000000000
+          Depth = 0.001000000047497451
+          HitTest = False
+          Quanternion = '(0.70710676908493,0,0,-0.70710676908493)'
+        end
+        object Light1: TLight
+          Color = claWhite
+          LightType = Directional
+          SpotCutOff = 180.000000000000000000
+          RotationAngle.X = 315.000000000000000000
+          Width = 1.000000000000000000
+          Height = 1.000000000000000000
+          Depth = 1.000000000000000000
+          Quanternion = '(0.382683485746384,0,0,-0.923879504203796)'
+        end
+        object Dummy1: TDummy
+          RotationAngle.Y = 330.000000000000000000
+          Width = 1.000000000000000000
+          Height = 1.000000000000000000
+          Depth = 1.000000000000000000
+          Quanternion = '(0,0.258819103240967,0,-0.965925812721252)'
+          object Dummy2: TDummy
+            RotationAngle.X = 330.000000000000000000
+            Width = 1.000000000000000000
+            Height = 1.000000000000000000
+            Depth = 1.000000000000000000
+            Quanternion = '(-0.258819162845612,0,0,0.965925812721252)'
+            object Camera1: TCamera
+              AngleOfView = 45.000000000000000000
+              Position.Z = -25.000000000000000000
+              Width = 1.000000000000000000
+              Height = 1.000000000000000000
+              Depth = 1.000000000000000000
+            end
+          end
+        end
+        object StrokeCube1: TStrokeCube
+          Color = claWhite
+          Width = 10.000000000000000000
+          Height = 10.000000000000000000
+          Depth = 10.000000000000000000
+          HitTest = False
+        end
+      end
+    end
+    object TabItemS: TTabItem
+      CustomIcon = <
+        item
+        end>
+      IsSelected = False
+      Size.Width = 57.000000000000000000
+      Size.Height = 26.000000000000000000
+      Size.PlatformDefault = False
+      StyleLookup = ''
+      TabOrder = 0
+      Text = 'Shader'
+      ExplicitSize.cx = 70.000000000000000000
+      ExplicitSize.cy = 26.000000000000000000
+      object TabControlS: TTabControl
+        Align = Client
+        Margins.Left = 10.000000000000000000
+        Margins.Top = 10.000000000000000000
+        Margins.Right = 10.000000000000000000
+        Margins.Bottom = 10.000000000000000000
+        Size.Width = 800.000000000000000000
+        Size.Height = 600.000000000000000000
+        Size.PlatformDefault = False
+        TabIndex = 0
+        TabOrder = 0
+        TabPosition = PlatformDefault
+        Sizes = (
+          800s
+          574s
+          800s
+          574s)
+        object TabItemSV: TTabItem
+          CustomIcon = <
+            item
+            end>
+          IsSelected = True
+          Size.Width = 54.000000000000000000
+          Size.Height = 26.000000000000000000
+          Size.PlatformDefault = False
+          StyleLookup = ''
+          TabOrder = 0
+          Text = 'Vertex'
+          ExplicitSize.cx = 70.000000000000000000
+          ExplicitSize.cy = 26.000000000000000000
+          object TabControlSV: TTabControl
+            Align = Client
+            Margins.Left = 10.000000000000000000
+            Margins.Top = 10.000000000000000000
+            Margins.Right = 10.000000000000000000
+            Margins.Bottom = 10.000000000000000000
+            Size.Width = 780.000000000000000000
+            Size.Height = 554.000000000000000000
+            Size.PlatformDefault = False
+            TabIndex = 0
+            TabOrder = 0
+            TabPosition = PlatformDefault
+            Sizes = (
+              780s
+              528s
+              780s
+              528s)
+            object TabItemSVC: TTabItem
+              CustomIcon = <
+                item
+                end>
+              IsSelected = True
+              Size.Width = 48.000000000000000000
+              Size.Height = 26.000000000000000000
+              Size.PlatformDefault = False
+              StyleLookup = ''
+              TabOrder = 0
+              Text = 'Code'
+              object MemoSVC: TMemo
+                Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
+                DataDetectorTypes = []
+                StyledSettings = [Size, FontColor]
+                TextSettings.Font.Family = #65325#65331' '#12468#12471#12483#12463
+                Align = Client
+                Margins.Left = 10.000000000000000000
+                Margins.Top = 10.000000000000000000
+                Margins.Right = 10.000000000000000000
+                Margins.Bottom = 10.000000000000000000
+                Size.Width = 760.000000000000000000
+                Size.Height = 508.000000000000000000
+                Size.PlatformDefault = False
+                TabOrder = 0
+                Viewport.Width = 756.000000000000000000
+                Viewport.Height = 504.000000000000000000
+              end
+            end
+            object TabItemSVE: TTabItem
+              CustomIcon = <
+                item
+                end>
+              IsSelected = False
+              Size.Width = 46.000000000000000000
+              Size.Height = 26.000000000000000000
+              Size.PlatformDefault = False
+              StyleLookup = ''
+              TabOrder = 0
+              Text = 'Error'
+              object MemoSVE: TMemo
+                Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
+                DataDetectorTypes = []
+                StyledSettings = [Size, FontColor]
+                TextSettings.Font.Family = #65325#65331' '#12468#12471#12483#12463
+                Align = Client
+                Margins.Left = 10.000000000000000000
+                Margins.Top = 10.000000000000000000
+                Margins.Right = 10.000000000000000000
+                Margins.Bottom = 10.000000000000000000
+                Size.Width = 760.000000000000000000
+                Size.Height = 508.000000000000000000
+                Size.PlatformDefault = False
+                TabOrder = 0
+                Viewport.Width = 756.000000000000000000
+                Viewport.Height = 504.000000000000000000
+              end
+            end
+          end
+        end
+        object TabItemSP: TTabItem
+          CustomIcon = <
+            item
+            end>
+          IsSelected = False
+          Size.Width = 45.000000000000000000
+          Size.Height = 26.000000000000000000
+          Size.PlatformDefault = False
+          StyleLookup = ''
+          TabOrder = 0
+          Text = 'Pixel'
+          ExplicitSize.cx = 70.000000000000000000
+          ExplicitSize.cy = 26.000000000000000000
+          object TabControlSP: TTabControl
+            Align = Client
+            Margins.Left = 10.000000000000000000
+            Margins.Top = 10.000000000000000000
+            Margins.Right = 10.000000000000000000
+            Margins.Bottom = 10.000000000000000000
+            Size.Width = 780.000000000000000000
+            Size.Height = 554.000000000000000000
+            Size.PlatformDefault = False
+            TabIndex = 0
+            TabOrder = 0
+            TabPosition = PlatformDefault
+            Sizes = (
+              780s
+              528s
+              780s
+              528s)
+            object TabItemSPC: TTabItem
+              CustomIcon = <
+                item
+                end>
+              IsSelected = True
+              Size.Width = 48.000000000000000000
+              Size.Height = 26.000000000000000000
+              Size.PlatformDefault = False
+              StyleLookup = ''
+              TabOrder = 0
+              Text = 'Code'
+              ExplicitSize.cx = 57.000000000000000000
+              ExplicitSize.cy = 26.000000000000000000
+              object MemoSPC: TMemo
+                Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
+                DataDetectorTypes = []
+                Lines.Strings = (
+                  ''
+                  '')
+                StyledSettings = [Size, Style, FontColor]
+                TextSettings.Font.Family = #65325#65331' '#12468#12471#12483#12463
+                Align = Client
+                Margins.Left = 10.000000000000000000
+                Margins.Top = 10.000000000000000000
+                Margins.Right = 10.000000000000000000
+                Margins.Bottom = 10.000000000000000000
+                Size.Width = 760.000000000000000000
+                Size.Height = 508.000000000000000000
+                Size.PlatformDefault = False
+                TabOrder = 0
+                Viewport.Width = 756.000000000000000000
+                Viewport.Height = 504.000000000000000000
+              end
+            end
+            object TabItemSPE: TTabItem
+              CustomIcon = <
+                item
+                end>
+              IsSelected = False
+              Size.Width = 46.000000000000000000
+              Size.Height = 26.000000000000000000
+              Size.PlatformDefault = False
+              StyleLookup = ''
+              TabOrder = 0
+              Text = 'Error'
+              ExplicitSize.cx = 46.000000000000000000
+              ExplicitSize.cy = 26.000000000000000000
+              object MemoSPE: TMemo
+                Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
+                DataDetectorTypes = []
+                StyledSettings = [Size, FontColor]
+                TextSettings.Font.Family = #65325#65331' '#12468#12471#12483#12463
+                Align = Client
+                Margins.Left = 10.000000000000000000
+                Margins.Top = 10.000000000000000000
+                Margins.Right = 10.000000000000000000
+                Margins.Bottom = 10.000000000000000000
+                Size.Width = 760.000000000000000000
+                Size.Height = 508.000000000000000000
+                Size.PlatformDefault = False
+                TabOrder = 0
+                Viewport.Width = 756.000000000000000000
+                Viewport.Height = 504.000000000000000000
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+end
