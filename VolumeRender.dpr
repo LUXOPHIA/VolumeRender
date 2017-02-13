@@ -24,9 +24,9 @@ uses
   LUX.FMX.Material in '_LIBRARY\LUXOPHIA\LUX.FMX\LUX.FMX.Material.pas',
   LUX.FMX.Types3D in '_LIBRARY\LUXOPHIA\LUX.FMX\LUX.FMX.Types3D.pas',
   LUX.FMX.Context.DX11 in '_LIBRARY\LUXOPHIA\LUX.FMX\LUX.FMX.Context.DX11.pas',
-  LUX.Lattice.T2 in '_LIBRARY\LUXOPHIA\LUX.Lattice\LUX.Lattice.T2.pas',
-  LUX.Lattice.T3 in '_LIBRARY\LUXOPHIA\LUX.Lattice\LUX.Lattice.T3.pas',
-  LUX.Lattice.T1 in '_LIBRARY\LUXOPHIA\LUX.Lattice\LUX.Lattice.T1.pas';
+  LUX.Lattice.T1 in '_LIBRARY\LUXOPHIA\LUX\LUX.Lattice.T1.pas',
+  LUX.Lattice.T2 in '_LIBRARY\LUXOPHIA\LUX\LUX.Lattice.T2.pas',
+  LUX.Lattice.T3 in '_LIBRARY\LUXOPHIA\LUX\LUX.Lattice.T3.pas';
 
 {$R *.res}
 
