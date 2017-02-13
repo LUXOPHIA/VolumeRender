@@ -2045,7 +2045,7 @@ begin
 
                     _VSSlotModified := True;
 
-                    Exit;
+                    Break;
                end;
           end;
      end;
@@ -2062,7 +2062,7 @@ begin
 
                     _PSSlotModified := True;
 
-                    Exit;
+                    Break;
                end;
           end;
      end;
