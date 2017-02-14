@@ -60,7 +60,7 @@ object Form1: TForm1
           Frequency = 1.000000000000000000
           LineColor = x50505050
           Cursor = 5
-          Position.Y = 10.010000228881840000
+          Position.Y = 5.010000228881836000
           RotationAngle.X = 270.000000000000000000
           Width = 100.000000000000000000
           Height = 100.000000000000000000
@@ -179,6 +179,8 @@ object Form1: TForm1
               StyleLookup = ''
               TabOrder = 0
               Text = 'Code'
+              ExplicitSize.cx = 48.000000000000000000
+              ExplicitSize.cy = 26.000000000000000000
               object MemoSVC: TMemo
                 Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
                 DataDetectorTypes = []
@@ -208,6 +210,8 @@ object Form1: TForm1
               StyleLookup = ''
               TabOrder = 0
               Text = 'Error'
+              ExplicitSize.cx = 46.000000000000000000
+              ExplicitSize.cy = 26.000000000000000000
               object MemoSVE: TMemo
                 Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
                 DataDetectorTypes = []
