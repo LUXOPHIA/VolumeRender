@@ -1,4 +1,30 @@
-﻿//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【定数】
+﻿//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【型】
+
+struct TRay
+{
+    float3 Pos;
+    float3 Vec;
+};
+
+inline TRay newTRay( const float3 Pos_, const float3 Vec_ )
+{
+    TRay Result;
+
+    Result.Pos = Pos_;
+    Result.Vec = Vec_;
+
+    return Result;
+}
+
+//------------------------------------------------------------------------------
+
+struct TGaussPoin
+{
+    float w;
+    float x;
+};
+
+//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【定数】
 
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【設定】
 
@@ -6,7 +32,29 @@ SamplerState _SamplerState {};
 
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【ルーチン】
 
-inline int MinI( float A_, float B_, float C_ )
+inline int3 sign3( const float3 P_ )
+{
+    int3 Result;
+
+    Result.x = sign( P_.x );
+    Result.y = sign( P_.y );
+    Result.z = sign( P_.z );
+
+    return Result;
+}
+
+inline int3 floor3( const float3 P_ )
+{
+    int3 Result;
+
+    Result.x = floor( P_.x );
+    Result.y = floor( P_.y );
+    Result.z = floor( P_.z );
+
+    return Result;
+}
+
+inline int MinI( const float A_, const float B_, const float C_ )
 {
     if ( A_ <= B_ )
     {
@@ -22,13 +70,7 @@ inline int MinI( float A_, float B_, float C_ )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-struct TGaussPoin
-{
-    float w;
-    float x;
-};
-
-inline float4 GetVolume2( float3 V_, float3 P_, float T0_, float T1_ )
+inline float4 GetVolume2( const float3 V_, const float3 P_, const float T0_, const float T1_ )
 {
     const TGaussPoin G[ 1 ] = { { 1.0, sqrt( 1.0 / 3.0 ) } };
 
@@ -51,7 +93,7 @@ inline float4 GetVolume2( float3 V_, float3 P_, float T0_, float T1_ )
     return R * _Result;
 }
 
-inline float4 GetVolume3( float3 V_, float3 P_, float T0_, float T1_ )
+inline float4 GetVolume3( const float3 V_, const float3 P_, const float T0_, const float T1_ )
 {
     const TGaussPoin G[ 2 ] = { { 8.0 / 9.0, 0.0               },
                                 { 5.0 / 9.0, sqrt( 3.0 / 5.0 ) } };
@@ -76,7 +118,7 @@ inline float4 GetVolume3( float3 V_, float3 P_, float T0_, float T1_ )
     return R * _Result;
 }
 
-inline float4 GetVolume4( float3 V_, float3 P_, float T0_, float T1_ )
+inline float4 GetVolume4( const float3 V_, const float3 P_, const float T0_, const float T1_ )
 {
     const TGaussPoin G[ 2 ] = { { ( 18.0 + sqrt( 30.0 ) ) / 36.0, sqrt( ( 3.0 - 2.0 * sqrt( 6.0 / 5.0 ) ) / 7.0 ) },
                                 { ( 18.0 - sqrt( 30.0 ) ) / 36.0, sqrt( ( 3.0 + 2.0 * sqrt( 6.0 / 5.0 ) ) / 7.0 ) } };
@@ -102,7 +144,7 @@ inline float4 GetVolume4( float3 V_, float3 P_, float T0_, float T1_ )
     return R * _Result;
 }
 
-inline float4 GetVolume5( float3 V_, float3 P_, float T0_, float T1_ )
+inline float4 GetVolume5( const float3 V_, const float3 P_, const float T0_, const float T1_ )
 {
     const TGaussPoin G[ 3 ] = { {   128.0                         / 225.0, 0.0                                          },
                                 { ( 322.0 + 13.0 * sqrt( 70.0 ) ) / 900.0, sqrt( 5.0 - 2.0 * sqrt( 10.0 / 7.0 ) ) / 3.0 },
@@ -145,7 +187,7 @@ struct TResultP
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TResultP MainP( TSenderP _Sender )
+TResultP MainP( const TSenderP _Sender )
 {
     TResultP _Result;
 
@@ -154,14 +196,9 @@ TResultP MainP( TSenderP _Sender )
     float3 EV = normalize( P0 - EP );
 
     int3 _VoxelsN;
-    _Texture3D.GetDimensions( _VoxelsN.x,
-                              _VoxelsN.y,
-                              _VoxelsN.z );
+    _Texture3D.GetDimensions( _VoxelsN.x, _VoxelsN.y, _VoxelsN.z );
 
-    int3 Id;
-    Id.x = sign( EV.x );
-    Id.y = sign( EV.y );
-    Id.z = sign( EV.z );
+    int3 Id = sign3( EV );
 
     int3 Iv[ 3 ] = { { Id.x,    0,    0 },
                      {    0, Id.y,    0 },
@@ -183,10 +220,7 @@ TResultP MainP( TSenderP _Sender )
     P.y = P0.y / Sd.y - 0.5;
     P.z = P0.z / Sd.z - 0.5;
 
-    int3 I;
-    I.x = floor( P.x );
-    I.y = floor( P.y );
-    I.z = floor( P.z );
+    int3 I = floor3( P );
 
     float3 Pd = P - I;
 
