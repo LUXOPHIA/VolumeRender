@@ -79,6 +79,11 @@ inline int MinI( const float A_, const float B_, const float C_ )
     }
 }
 
+inline int MinI( const float3 V_ )
+{
+    return MinI( V_.x, V_.y, V_.z );
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 inline float4 GetVolume2( const TRay R_, const float T0_, const float T1_ )
@@ -209,50 +214,50 @@ TResultP MainP( const TSenderP _Sender )
     int3 _VoxelsN;
     _Texture3D.GetDimensions( _VoxelsN.x, _VoxelsN.y, _VoxelsN.z );
 
-    int3 Id = sign3( R.Vec );
+    int3 Gv = sign3( R.Vec );
 
-    int3 Iv[ 3 ] = { { Id.x,    0,    0 },
-                     {    0, Id.y,    0 },
-                     {    0,    0, Id.z } };
+    int3 Gvs[ 3 ] = { { Gv.x,    0,    0 },
+                      {    0, Gv.y,    0 },
+                      {    0,    0, Gv.z } };
 
     float3 Sd = _Size / _VoxelsN;
 
-    float3 Td = Sd / abs3( R.Vec );
+    float3 Tv = Sd / abs3( R.Vec );
 
-    float3 Tv[ 3 ] = { { Td.x,    0,    0 },
-                       {    0, Td.y,    0 },
-                       {    0,    0, Td.z } };
+    float3 Tvs[ 3 ] = { { Tv.x,    0,    0 },
+                        {    0, Tv.y,    0 },
+                        {    0,    0, Tv.z } };
 
-    float3 P = R.Pos / Sd - float3( 0.5, 0.5, 0.5 );
+    float3 G = R.Pos / Sd - float3( 0.5, 0.5, 0.5 );
 
-    int3 I = floor3( P );
+    int3 Gi = floor3( G );
 
-    float3 Pd = P - I;
+    float3 Gd = G - Gi;
 
-    float3 T;
-    if ( R.Vec.x > 0 ) T.x = Td.x * ( 1 - Pd.x ); else T.x = Td.x * Pd.x;
-    if ( R.Vec.y > 0 ) T.y = Td.y * ( 1 - Pd.y ); else T.y = Td.y * Pd.y;
-    if ( R.Vec.z > 0 ) T.z = Td.z * ( 1 - Pd.z ); else T.z = Td.z * Pd.z;
+    float3 Ts;
+    if ( R.Vec.x > 0 ) Ts.x = Tv.x * ( 1 - Gd.x ); else Ts.x = Tv.x * Gd.x;
+    if ( R.Vec.y > 0 ) Ts.y = Tv.y * ( 1 - Gd.y ); else Ts.y = Tv.y * Gd.y;
+    if ( R.Vec.z > 0 ) Ts.z = Tv.z * ( 1 - Gd.z ); else Ts.z = Tv.z * Gd.z;
 
     Result.Col = 0;
 
     float T0 = 0;
 
     [loop]
-    while ( ( -1 <= I.x ) && ( I.x <= _VoxelsN.x )
-         && ( -1 <= I.y ) && ( I.y <= _VoxelsN.y )
-         && ( -1 <= I.z ) && ( I.z <= _VoxelsN.z ) )
+    while ( ( -1 <= Gi.x ) && ( Gi.x <= _VoxelsN.x )
+         && ( -1 <= Gi.y ) && ( Gi.y <= _VoxelsN.y )
+         && ( -1 <= Gi.z ) && ( Gi.z <= _VoxelsN.z ) )
     {
-        int K = MinI( T.x, T.y, T.z );
+        int K = MinI( Ts );
 
-        float T1 = T[ K ];
+        float T1 = Ts[ K ];
 
         Result.Col += GetVolume2( R, T0, T1 );
 
         T0 = T1;
 
-        I = I + Iv[ K ];
-        T = T + Tv[ K ];
+        Gi += Gvs[ K ];
+        Ts += Tvs[ K ];
     }
 
     Result.Col /= 6;
