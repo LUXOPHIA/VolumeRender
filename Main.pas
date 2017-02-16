@@ -157,6 +157,7 @@ begin
 
                C := TAlphaColorF.Create( Random( 5 ) / 4,
                                          Random( 5 ) / 4,
+                                         Random( 5 ) / 4,
                                          Random( 5 ) / 4 );
 
                DrawSphere( P, R, C );
