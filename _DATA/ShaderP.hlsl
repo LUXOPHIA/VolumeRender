@@ -43,6 +43,17 @@ inline int3 sign3( const float3 P_ )
     return Result;
 }
 
+inline float3 abs3( const float3 P_ )
+{
+    float3 Result;
+
+    Result.x = abs( P_.x );
+    Result.y = abs( P_.y );
+    Result.z = abs( P_.z );
+
+    return Result;
+}
+
 inline int3 floor3( const float3 P_ )
 {
     int3 Result;
@@ -70,7 +81,7 @@ inline int MinI( const float A_, const float B_, const float C_ )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-inline float4 GetVolume2( const float3 V_, const float3 P_, const float T0_, const float T1_ )
+inline float4 GetVolume2( const TRay R_, const float T0_, const float T1_ )
 {
     const TGaussPoin G[ 1 ] = { { 1.0, sqrt( 1.0 / 3.0 ) } };
 
@@ -85,7 +96,7 @@ inline float4 GetVolume2( const float3 V_, const float3 P_, const float T0_, con
     [unroll]
     for ( uint I = 0; I < 2; I++ )
     {
-        float3 P = V_ * ( R * Gs[ I ].x + C ) + P_;
+        float3 P = R_.Vec * ( R * Gs[ I ].x + C ) + R_.Pos;
 
         _Result += Gs[ I ].w * _Texture3D.Sample( _SamplerState, P / _Size );
     }
@@ -93,7 +104,7 @@ inline float4 GetVolume2( const float3 V_, const float3 P_, const float T0_, con
     return R * _Result;
 }
 
-inline float4 GetVolume3( const float3 V_, const float3 P_, const float T0_, const float T1_ )
+inline float4 GetVolume3( const TRay R_, const float T0_, const float T1_ )
 {
     const TGaussPoin G[ 2 ] = { { 8.0 / 9.0, 0.0               },
                                 { 5.0 / 9.0, sqrt( 3.0 / 5.0 ) } };
@@ -110,7 +121,7 @@ inline float4 GetVolume3( const float3 V_, const float3 P_, const float T0_, con
     [unroll]
     for ( uint I = 0; I < 3; I++ )
     {
-        float3 P = V_ * ( R * Gs[ I ].x + C ) + P_;
+        float3 P = R_.Vec * ( R * Gs[ I ].x + C ) + R_.Pos;
 
         _Result += Gs[ I ].w * _Texture3D.Sample( _SamplerState, P / _Size );
     }
@@ -118,7 +129,7 @@ inline float4 GetVolume3( const float3 V_, const float3 P_, const float T0_, con
     return R * _Result;
 }
 
-inline float4 GetVolume4( const float3 V_, const float3 P_, const float T0_, const float T1_ )
+inline float4 GetVolume4( const TRay R_, const float T0_, const float T1_ )
 {
     const TGaussPoin G[ 2 ] = { { ( 18.0 + sqrt( 30.0 ) ) / 36.0, sqrt( ( 3.0 - 2.0 * sqrt( 6.0 / 5.0 ) ) / 7.0 ) },
                                 { ( 18.0 - sqrt( 30.0 ) ) / 36.0, sqrt( ( 3.0 + 2.0 * sqrt( 6.0 / 5.0 ) ) / 7.0 ) } };
@@ -136,7 +147,7 @@ inline float4 GetVolume4( const float3 V_, const float3 P_, const float T0_, con
     [unroll]
     for ( uint I = 0; I < 4; I++ )
     {
-        float3 P = V_ * ( R * Gs[ I ].x + C ) + P_;
+        float3 P = R_.Vec * ( R * Gs[ I ].x + C ) + R_.Pos;
 
         _Result += Gs[ I ].w * _Texture3D.Sample( _SamplerState, P / _Size );
     }
@@ -144,7 +155,7 @@ inline float4 GetVolume4( const float3 V_, const float3 P_, const float T0_, con
     return R * _Result;
 }
 
-inline float4 GetVolume5( const float3 V_, const float3 P_, const float T0_, const float T1_ )
+inline float4 GetVolume5( const TRay R_, const float T0_, const float T1_ )
 {
     const TGaussPoin G[ 3 ] = { {   128.0                         / 225.0, 0.0                                          },
                                 { ( 322.0 + 13.0 * sqrt( 70.0 ) ) / 900.0, sqrt( 5.0 - 2.0 * sqrt( 10.0 / 7.0 ) ) / 3.0 },
@@ -164,7 +175,7 @@ inline float4 GetVolume5( const float3 V_, const float3 P_, const float T0_, con
     [unroll]
     for ( uint I = 0; I < 5; I++ )
     {
-        float3 P = V_ * ( R * Gs[ I ].x + C ) + P_;
+        float3 P = R_.Vec * ( R * Gs[ I ].x + C ) + R_.Pos;
 
         _Result += Gs[ I ].w * _Texture3D.Sample( _SamplerState, P / _Size );
     }
@@ -189,16 +200,16 @@ struct TResultP
 
 TResultP MainP( const TSenderP _Sender )
 {
-    TResultP _Result;
+    TResultP Result;
 
-    float3 P0 = _Sender.Pos.xyz;
-    float3 EP = mul( _EyePos, _MatrixGL ).xyz;
-    float3 EV = normalize( P0 - EP );
+    float3 E = mul( _EyePos, _MatrixGL ).xyz;
+
+    TRay R = newTRay( _Sender.Pos.xyz, normalize( _Sender.Pos.xyz - E ) );
 
     int3 _VoxelsN;
     _Texture3D.GetDimensions( _VoxelsN.x, _VoxelsN.y, _VoxelsN.z );
 
-    int3 Id = sign3( EV );
+    int3 Id = sign3( R.Vec );
 
     int3 Iv[ 3 ] = { { Id.x,    0,    0 },
                      {    0, Id.y,    0 },
@@ -206,30 +217,24 @@ TResultP MainP( const TSenderP _Sender )
 
     float3 Sd = _Size / _VoxelsN;
 
-    float3 Td;
-    Td.x = Sd.x / abs( EV.x );
-    Td.y = Sd.y / abs( EV.y );
-    Td.z = Sd.z / abs( EV.z );
+    float3 Td = Sd / abs3( R.Vec );
 
     float3 Tv[ 3 ] = { { Td.x,    0,    0 },
                        {    0, Td.y,    0 },
                        {    0,    0, Td.z } };
 
-    float3 P;
-    P.x = P0.x / Sd.x - 0.5;
-    P.y = P0.y / Sd.y - 0.5;
-    P.z = P0.z / Sd.z - 0.5;
+    float3 P = R.Pos / Sd - float3( 0.5, 0.5, 0.5 );
 
     int3 I = floor3( P );
 
     float3 Pd = P - I;
 
     float3 T;
-    if ( EV.x > 0 ) T.x = Td.x * ( 1 - Pd.x ); else T.x = Td.x * Pd.x;
-    if ( EV.y > 0 ) T.y = Td.y * ( 1 - Pd.y ); else T.y = Td.y * Pd.y;
-    if ( EV.z > 0 ) T.z = Td.z * ( 1 - Pd.z ); else T.z = Td.z * Pd.z;
+    if ( R.Vec.x > 0 ) T.x = Td.x * ( 1 - Pd.x ); else T.x = Td.x * Pd.x;
+    if ( R.Vec.y > 0 ) T.y = Td.y * ( 1 - Pd.y ); else T.y = Td.y * Pd.y;
+    if ( R.Vec.z > 0 ) T.z = Td.z * ( 1 - Pd.z ); else T.z = Td.z * Pd.z;
 
-    _Result.Col = 0;
+    Result.Col = 0;
 
     float T0 = 0;
 
@@ -242,7 +247,7 @@ TResultP MainP( const TSenderP _Sender )
 
         float T1 = T[ K ];
 
-        _Result.Col += GetVolume2( EV, P0, T0, T1 );
+        Result.Col += GetVolume2( R, T0, T1 );
 
         T0 = T1;
 
@@ -250,15 +255,15 @@ TResultP MainP( const TSenderP _Sender )
         T = T + Tv[ K ];
     }
 
-    _Result.Col /= 6;
+    Result.Col /= 6;
 
     //--------------------------------------------------------------------------
 
-    _Result.Col.a = 0;
+    Result.Col.a = 0;
 
-    _Result.Col = _Opacity * _Result.Col;
+    Result.Col = _Opacity * Result.Col;
 
-    return _Result;
+    return Result;
 }
 
 //##############################################################################
