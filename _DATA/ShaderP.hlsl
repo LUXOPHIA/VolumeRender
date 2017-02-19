@@ -172,116 +172,80 @@ inline float4 GetField( const float3 P_ )
 {
     float3 G = P_ / _Size * _VoxelsN - 0.5;
 
-    return GetVolumeBS1( G );  // Linear    Interpolation
-  //return GetVolumeBS4( G );  // B-Spline4 Interpolation
+  //return GetVolumeBS1( G );  // Linear    Interpolation
+    return GetVolumeBS4( G );  // B-Spline4 Interpolation
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 inline float4 GetAccum1( const TRay R_, const float T0_, const float T1_ )
 {
-    const TGaussPoin Gs[ 1 ] = { { 2, 0 } };
+    const TGaussPoin S1 = { 2.0000000000000000,  0.0000000000000000 };
 
     float C = ( T1_ + T0_ ) / 2;
     float R = ( T1_ - T0_ ) / 2;
 
-    float4 A = Gs[ 0 ].w * GetField( R_.Vec * ( R * Gs[ 0 ].x + C ) + R_.Pos );
-
-    return R * A;
+    return R * ( S1.w * GetField( R_.Vec * ( R * S1.x + C ) + R_.Pos ) );
 }
 
 inline float4 GetAccum2( const TRay R_, const float T0_, const float T1_ )
 {
-    const TGaussPoin G[ 1 ] = { { 1.0, sqrt( 1.0 / 3.0 ) } };
-
-    const TGaussPoin Gs[ 2 ] = { { G[ 0 ].w, -G[ 0 ].x },
-                                 { G[ 0 ].w, +G[ 0 ].x } };
-
-    float4 Result = 0;
+    const TGaussPoin S1 = { 1.0000000000000000, -0.5773502691896257 };
+    const TGaussPoin S2 = { 1.0000000000000000, -0.5773502691896257 };
 
     float C = ( T1_ + T0_ ) / 2;
     float R = ( T1_ - T0_ ) / 2;
 
-    [unroll]
-    for ( uint I = 0; I < 2; I++ )
-    {
-        Result += Gs[ I ].w * GetField( R_.Vec * ( R * Gs[ I ].x + C ) + R_.Pos );
-    }
-
-    return R * Result;
+    return R * ( S1.w * GetField( R_.Vec * ( R * S1.x + C ) + R_.Pos )
+               + S2.w * GetField( R_.Vec * ( R * S2.x + C ) + R_.Pos ) );
 }
 
 inline float4 GetAccum3( const TRay R_, const float T0_, const float T1_ )
 {
-    const TGaussPoin G[ 2 ] = { { 8.0 / 9.0, 0.0               },
-                                { 5.0 / 9.0, sqrt( 3.0 / 5.0 ) } };
-
-    const TGaussPoin Gs[ 3 ] = { { G[ 1 ].w, -G[ 1 ].x },
-                                 { G[ 0 ].w,  G[ 0 ].x },
-                                 { G[ 1 ].w, +G[ 1 ].x } };
-
-    float4 Result = 0;
+    const TGaussPoin S1 = { 0.5555555555555556, -0.7745966692414834 };
+    const TGaussPoin S2 = { 0.8888888888888888,  0.0000000000000000 };
+    const TGaussPoin S3 = { 0.5555555555555556, +0.7745966692414834 };
 
     float C = ( T1_ + T0_ ) / 2;
     float R = ( T1_ - T0_ ) / 2;
 
-    [unroll]
-    for ( uint I = 0; I < 3; I++ )
-    {
-        Result += Gs[ I ].w * GetField( R_.Vec * ( R * Gs[ I ].x + C ) + R_.Pos );
-    }
-
-    return R * Result;
+    return R * ( S1.w * GetField( R_.Vec * ( R * S1.x + C ) + R_.Pos )
+               + S2.w * GetField( R_.Vec * ( R * S2.x + C ) + R_.Pos )
+               + S3.w * GetField( R_.Vec * ( R * S3.x + C ) + R_.Pos ) );
 }
 
 inline float4 GetAccum4( const TRay R_, const float T0_, const float T1_ )
 {
-    const TGaussPoin G[ 2 ] = { { ( 18.0 + sqrt( 30.0 ) ) / 36.0, sqrt( ( 3.0 - 2.0 * sqrt( 6.0 / 5.0 ) ) / 7.0 ) },
-                                { ( 18.0 - sqrt( 30.0 ) ) / 36.0, sqrt( ( 3.0 + 2.0 * sqrt( 6.0 / 5.0 ) ) / 7.0 ) } };
-
-    const TGaussPoin Gs[ 4 ] = { { G[ 1 ].w, -G[ 1 ].x },
-                                 { G[ 0 ].w, -G[ 0 ].x },
-                                 { G[ 0 ].w, +G[ 0 ].x },
-                                 { G[ 1 ].w, +G[ 1 ].x } };
-
-    float4 Result = 0;
+    const TGaussPoin S1 = { 0.3478548451374538, -0.8611363115940526 };
+    const TGaussPoin S2 = { 0.6521451548625461, -0.3399810435848563 };
+    const TGaussPoin S3 = { 0.6521451548625461, +0.3399810435848563 };
+    const TGaussPoin S4 = { 0.3478548451374538, +0.8611363115940526 };
 
     float C = ( T1_ + T0_ ) / 2;
     float R = ( T1_ - T0_ ) / 2;
 
-    [unroll]
-    for ( uint I = 0; I < 4; I++ )
-    {
-        Result += Gs[ I ].w * GetField( R_.Vec * ( R * Gs[ I ].x + C ) + R_.Pos );
-    }
-
-    return R * Result;
+    return R * ( S1.w * GetField( R_.Vec * ( R * S1.x + C ) + R_.Pos )
+               + S2.w * GetField( R_.Vec * ( R * S2.x + C ) + R_.Pos )
+               + S3.w * GetField( R_.Vec * ( R * S3.x + C ) + R_.Pos )
+               + S4.w * GetField( R_.Vec * ( R * S4.x + C ) + R_.Pos ) );
 }
 
 inline float4 GetAccum5( const TRay R_, const float T0_, const float T1_ )
 {
-    const TGaussPoin G[ 3 ] = { {   128.0                         / 225.0, 0.0                                          },
-                                { ( 322.0 + 13.0 * sqrt( 70.0 ) ) / 900.0, sqrt( 5.0 - 2.0 * sqrt( 10.0 / 7.0 ) ) / 3.0 },
-                                { ( 322.0 - 13.0 * sqrt( 70.0 ) ) / 900.0, sqrt( 5.0 + 2.0 * sqrt( 10.0 / 7.0 ) ) / 3.0 } };
-
-    const TGaussPoin Gs[ 5 ] = { { G[ 2 ].w, -G[ 2 ].x },
-                                 { G[ 1 ].w, -G[ 1 ].x },
-                                 { G[ 0 ].w,  G[ 0 ].x },
-                                 { G[ 1 ].w, +G[ 1 ].x },
-                                 { G[ 2 ].w, +G[ 2 ].x } };
-
-    float4 Result = 0;
+    const TGaussPoin S1 = { 0.2369268850561891, -0.9061798459386640 };
+    const TGaussPoin S2 = { 0.4786286704993665, -0.5384693101056831 };
+    const TGaussPoin S3 = { 0.5688888888888889,  0.0000000000000000 };
+    const TGaussPoin S4 = { 0.4786286704993665, +0.5384693101056831 };
+    const TGaussPoin S5 = { 0.2369268850561891, +0.9061798459386640 };
 
     float C = ( T1_ + T0_ ) / 2;
     float R = ( T1_ - T0_ ) / 2;
 
-    [unroll]
-    for ( uint I = 0; I < 5; I++ )
-    {
-        Result += Gs[ I ].w * GetField( R_.Vec * ( R * Gs[ I ].x + C ) + R_.Pos );
-    }
-
-    return R * Result;
+    return R * ( S1.w * GetField( R_.Vec * ( R * S1.x + C ) + R_.Pos )
+               + S2.w * GetField( R_.Vec * ( R * S2.x + C ) + R_.Pos )
+               + S3.w * GetField( R_.Vec * ( R * S3.x + C ) + R_.Pos )
+               + S4.w * GetField( R_.Vec * ( R * S4.x + C ) + R_.Pos )
+               + S5.w * GetField( R_.Vec * ( R * S5.x + C ) + R_.Pos ) );
 }
 
 //##############################################################################
@@ -353,7 +317,7 @@ TResultP MainP( const TSenderP _Sender )
 
         float T1 = Ts[ K ];
 
-        Result.Col += GetAccum2( R, T0, T1 );
+        Result.Col += GetAccum3( R, T0, T1 );
 
         T0 = T1;
 
