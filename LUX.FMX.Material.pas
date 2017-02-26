@@ -4,30 +4,31 @@ interface //####################################################################
 
 uses System.Classes, System.UITypes, System.Generics.Collections,
      System.Types, System.Math.Vectors,
-     FMX.Types3D, FMX.MaterialSources,
+     FMX.Types, FMX.Types3D, FMX.MaterialSources,
      Winapi.D3DCommon, Winapi.D3D11Shader, Winapi.D3DCompiler,
      LUX, LUX.FMX.Types3D;
 
 type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【型】
 
-     TShaderVar                   = class;
-       TShaderVar<_TValue_>       = class;
-         TShaderVarPrim<_TValue_> = class;
-           TShaderVarSingle       = class;
-           TShaderVarPointF       = class;
-           TShaderVarPoint3D      = class;
-           TShaderVarVector3D     = class;
-           TShaderVarColor        = class;
-           TShaderVarColorF       = class;
-           TShaderVarMatrix3D     = class;
-           TShaderVarTexture      = class;
-           TShaderVarTexture3D    = class;
-         TShaderVarLight          = class;
-     TShaderSource                = class;
-       TShaderSourceV             = class;
-       TShaderSourceP             = class;
+     TShaderVar                                     = class;
+       TShaderVar<_TValue_>                         = class;
+         TShaderVarPrim<_TValue_>                   = class;
+           TShaderVarSingle                         = class;
+           TShaderVarPointF                         = class;
+           TShaderVarPoint3D                        = class;
+           TShaderVarVector3D                       = class;
+           TShaderVarColor                          = class;
+           TShaderVarColorF                         = class;
+           TShaderVarMatrix3D                       = class;
+           TShaderVarTexture                        = class;
+           TShaderVarTexture3D<_TValue_:TTexture3D> = class;
+         TShaderVarLight                            = class;
 
-     TLuxMaterial                 = class;
+     TShaderSource                                  = class;
+       TShaderSourceV                               = class;
+       TShaderSourceP                               = class;
+
+     TLuxMaterial                                   = class;
 
      ///////////////////////////////////////////////////////////////////////////
 
@@ -197,9 +198,9 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        function GetSource( var C_:Integer; var T_:Integer ) :String; override;
      end;
 
-     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TShaderVarTexture3D
+     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TShaderVarTexture3D<_TValue_>
 
-     TShaderVarTexture3D = class( TShaderVarPrim<TTexture3D> )
+     TShaderVarTexture3D<_TValue_:TTexture3D> = class( TShaderVarPrim<_TValue_> )
      private
      protected
        ///// アクセス
@@ -246,7 +247,7 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        _Entry   :AnsiString;
        _Source  :TStringList;
        _Targets :TDictionary<TContextShaderArch,AnsiString>;
-       _Errors  :TDictionary<AnsiString,AnsiString>;
+       _Errors  :TDictionary<String,String>;
        ///// アクセス
        function GetKind :TContextShaderKind; virtual; abstract;
        procedure SetSource( Sender_:TObject );
@@ -254,12 +255,13 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        constructor Create;
        destructor Destroy; override;
        ///// プロパティ
-       property Name   :String             read   _Name   write _Name  ;
-       property Shader :TContextShader     read   _Shader write _Shader;
-       property Kind   :TContextShaderKind read GetKind                ;
-       property Vars   :TShaderVars        read   _Vars   write _Vars  ;
-       property Entry  :AnsiString         read   _Entry  write _Entry ;
-       property Source :TStringList        read   _Source              ;
+       property Name   :String                             read   _Name   write _Name  ;
+       property Shader :TContextShader                     read   _Shader write _Shader;
+       property Kind   :TContextShaderKind                 read GetKind                ;
+       property Vars   :TShaderVars                        read   _Vars   write _Vars  ;
+       property Entry  :AnsiString                         read   _Entry  write _Entry ;
+       property Source :TStringList                        read   _Source              ;
+       property Errors :TDictionary<String,String> read   _Errors              ;
        ///// メソッド
        procedure LoadFromFile( const Name_:String );
        procedure LoadFromStream( const Stream_:TStream );
@@ -344,6 +346,8 @@ const //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 //var //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【変数】
 
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【ルーチン】
+
+function PixelFormatToColorN( const PF_:TPixelFormat ) :Byte;
 
 implementation //############################################################### ■
 
@@ -628,19 +632,19 @@ end;
 
 function TShaderVarMatrix3D.GetVars( var I_,T_:Integer; const U_:Byte ) :TContextShaderVariables;
 begin
-     Result := [ TContextShaderVariable.Create( Name + '_', Kind, I_, U_ * Size ) ];
+     Result := [ TContextShaderVariable.Create( Name, Kind, I_, U_ * Size ) ];
 
      Inc( I_, Size * U_ );
 end;
 
 procedure TShaderVarMatrix3D.SendVar( const Context_:TContext3D );
 begin
-     Context_.SetShaderVariable( _Name + '_', _Value );
+     Context_.SetShaderVariable( _Name, _Value );
 end;
 
 function TShaderVarMatrix3D.GetSource( var C_:Integer; var T_:Integer ) :String;
 begin
-     Result := 'float4x4 ' + _Name + '_ : register( c' + c_.ToString + ' );  static float4x4 ' + _Name + ' = transpose( ' + _Name + '_ );' + CRLF;
+     Result := 'row_major float4x4 ' + _Name + ' : register( c' + c_.ToString + ' );' + CRLF;
 
      Inc( c_, Size );
 end;
@@ -681,9 +685,9 @@ end;
 
 function TShaderVarTexture.GetSource( var C_:Integer; var T_:Integer ) :String;
 begin
-     Result := 'Texture2D<float4> ' + _Name + ' : register( t' + t_.ToString + ' );' + CRLF;
+     Result := 'Texture2D<float4> ' + _Name + ' : register( t' + T_.ToString + ' );' + CRLF;
 
-     Inc( t_, 1 );
+     Inc( T_, 1 );
 end;
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TShaderVarTexture3D
@@ -692,14 +696,14 @@ end;
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& protected
 
-constructor TShaderVarTexture3D.Create( const Name_:String );
+constructor TShaderVarTexture3D<_TValue_>.Create( const Name_:String );
 begin
      inherited;
 
-     _Value := TTexture3DBGRA.Create;
+     _Value := _TValue_.Create;
 end;
 
-destructor TShaderVarTexture3D.Destroy;
+destructor TShaderVarTexture3D<_TValue_>.Destroy;
 begin
      _Value.Free;
 
@@ -708,12 +712,12 @@ end;
 
 /////////////////////////////////////////////////////////////////////// アクセス
 
-function TShaderVarTexture3D.GetKind :TContextShaderVariableKind;
+function TShaderVarTexture3D<_TValue_>.GetKind :TContextShaderVariableKind;
 begin
      Result := TContextShaderVariableKind.Texture;
 end;
 
-function TShaderVarTexture3D.GetSize :Integer;
+function TShaderVarTexture3D<_TValue_>.GetSize :Integer;
 begin
      Result := 0;
 end;
@@ -722,23 +726,23 @@ end;
 
 /////////////////////////////////////////////////////////////////////// メソッド
 
-function TShaderVarTexture3D.GetVars( var I_,T_:Integer; const U_:Byte ) :TContextShaderVariables;
+function TShaderVarTexture3D<_TValue_>.GetVars( var I_,T_:Integer; const U_:Byte ) :TContextShaderVariables;
 begin
      Result := [ TContextShaderVariable.Create( Name, Kind, T_, U_ * Size ) ];
 
      Inc( T_, 1 );
 end;
 
-procedure TShaderVarTexture3D.SendVar( const Context_:TContext3D );
+procedure TShaderVarTexture3D<_TValue_>.SendVar( const Context_:TContext3D );
 begin
      Context_.SetShaderVariable( _Name, _Value );
 end;
 
-function TShaderVarTexture3D.GetSource( var C_:Integer; var T_:Integer ) :String;
+function TShaderVarTexture3D<_TValue_>.GetSource( var C_:Integer; var T_:Integer ) :String;
 begin
-     Result := 'Texture3D<float4> ' + _Name + ' : register( t' + t_.ToString + ' );' + CRLF;
+     Result := 'Texture3D<float' + PixelFormatToColorN( _Value.PixelFormat ).ToString + '> ' + _Name + ' : register( t' + T_.ToString + ' );' + CRLF;
 
-     Inc( t_, 1 );
+     Inc( T_, 1 );
 end;
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TShaderVarLight
@@ -812,13 +816,13 @@ end;
 
 function TShaderVarLight.GetSource( var C_:Integer; var T_:Integer ) :String;
 begin
-     Result := 'struct TLight'                                               + CRLF
-             + '{'                                                           + CRLF
-             + '    float3 Opt;'                                             + CRLF
-             + '    float3 Pos;'                                             + CRLF
-             + '    float3 Dir;'                                             + CRLF
-             + '    float4 Col;'                                             + CRLF
-             + '};'                                                          + CRLF
+     Result := 'struct TLight'                                            + CRLF
+             + '{'                                                        + CRLF
+             + '    float3 Opt;'                                          + CRLF
+             + '    float3 Pos;'                                          + CRLF
+             + '    float3 Dir;'                                          + CRLF
+             + '    float4 Col;'                                          + CRLF
+             + '};'                                                       + CRLF
              + 'TLight ' + _Name + ' : register( c' + c_.ToString + ' );' + CRLF;
 
      Inc( c_, Size );
@@ -845,7 +849,7 @@ begin
      _Source.OnChange := SetSource;
 
      _Targets := TDictionary<TContextShaderArch,AnsiString>.Create;
-     _Errors  := TDictionary<AnsiString,AnsiString>.Create;
+     _Errors  := TDictionary<String,String>.Create;
 end;
 
 destructor TShaderSource.Destroy;
@@ -905,12 +909,13 @@ end;
 
 procedure TShaderSource.Compile;
 var
-   S, N, T, Cs :AnsiString;
+   S, N, T :AnsiString;
    CSSs :array of TContextShaderSource;
    A :TContextShaderArch;
    H :HResult;
    B, E :ID3DBlob;
    Bs :TArray<Byte>;
+   M :String;
 begin
      TShaderManager.UnregisterShader( _Shader );
 
@@ -923,38 +928,37 @@ begin
 
      for A in _Targets.Keys do
      begin
-          T := _Targets.Items[ A ];
+          T := _Targets[ A ];
 
-          H := D3DCompile( PAnsiChar( S )     ,
-                           Length( S )        ,
-                           PAnsiChar( N )     ,
-                           nil                ,
-                           nil                ,
-                           PAnsiChar( _Entry ),
-                           PAnsiChar( T )     ,
-                           0                  ,
-                           0                  ,
-                           B                  ,
-                           E                   );
+          H := D3DCompile( PAnsiChar( S )                ,
+                           Length( S )                   ,
+                           PAnsiChar( N )                ,
+                           nil                           ,
+                           nil                           ,
+                           PAnsiChar( _Entry )           ,
+                           PAnsiChar( T )                ,
+                           D3DCOMPILE_OPTIMIZATION_LEVEL3,
+                           0                             ,
+                           B                             ,
+                           E                              );
 
-          if not Assigned( B ) then
+          if Assigned( B ) then
           begin
-               SetLength( Cs, E.GetBufferSize );
+               SetLength( Bs, B.GetBufferSize );
 
-               System.AnsiStrings.StrCopy( PAnsiChar( Cs ), E.GetBufferPointer );
+               Move( B.GetBufferPointer^, Bs[ 0 ], B.GetBufferSize );
 
-               _Errors.Add( T, Cs );
+               CSSs := CSSs + [ TContextShaderSource.Create( A, Bs, GetVars( A ) ) ];
+          end
+          else
+          begin
+               SetString( M, PAnsiChar( E.GetBufferPointer ), E.GetBufferSize );
 
-               Exit;
+               _Errors.Add( String( T ), M );
           end;
-
-          SetLength( Bs, B.GetBufferSize );
-          Move( B.GetBufferPointer^, Bs[0], B.GetBufferSize );
-
-          CSSs := CSSs + [ TContextShaderSource.Create( A, Bs, GetVars( A ) ) ];
      end;
 
-     _Shader := TShaderManager.RegisterShaderFromData( _Name, GetKind, '', CSSs );
+     if Assigned( CSSs ) then _Shader := TShaderManager.RegisterShaderFromData( _Name, GetKind, '', CSSs );
 end;
 
 procedure TShaderSource.SendVars( const Context_:TContext3D );
@@ -1093,6 +1097,36 @@ end;
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
 
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【ルーチン】
+
+function PixelFormatToColorN( const PF_:TPixelFormat ) :Byte;
+begin
+     case PF_ of
+       TPixelFormat.RGB     : Result := 3;
+       TPixelFormat.RGBA    : Result := 4;
+       TPixelFormat.BGR     : Result := 3;
+       TPixelFormat.BGRA    : Result := 4;
+       TPixelFormat.RGBA16  : Result := 4;
+       TPixelFormat.BGR_565 : Result := 3;
+       TPixelFormat.BGRA4   : Result := 4;
+       TPixelFormat.BGR4    : Result := 3;
+       TPixelFormat.BGR5_A1 : Result := 4;
+       TPixelFormat.BGR5    : Result := 3;
+       TPixelFormat.BGR10_A2: Result := 4;
+       TPixelFormat.RGB10_A2: Result := 4;
+       TPixelFormat.L       : Result := 1;
+       TPixelFormat.LA      : Result := 2;
+       TPixelFormat.LA4     : Result := 2;
+       TPixelFormat.L16     : Result := 1;
+       TPixelFormat.A       : Result := 1;
+       TPixelFormat.R16F    : Result := 1;
+       TPixelFormat.RG16F   : Result := 2;
+       TPixelFormat.RGBA16F : Result := 4;
+       TPixelFormat.R32F    : Result := 1;
+       TPixelFormat.RG32F   : Result := 2;
+       TPixelFormat.RGBA32F : Result := 4;
+     else                     Result := 4;
+     end;
+end;
 
 //############################################################################## □
 
