@@ -2,7 +2,7 @@
 
 ３次元配列をボリュームレンダリングする方法。
 
-[![](https://github.com/LUXOPHIA/VolumeRender/raw/master/--------/_SCREENSHOT/VolumeRender.png)](https://youtu.be/ZeR9oHSZE9Y)
+[![](https://github.com/LUXOPHIA/VolumeRender/raw/d2dc31f31459748f5daf6603043e882371efe122/--------/_SCREENSHOT/VolumeRender.png)](https://youtu.be/ZeR9oHSZE9Y)
 
 * [Volume Rendering @ Delphi - YouTube](https://youtu.be/ZeR9oHSZE9Y)
 * [Volume Rendering @ Delphi - Vimeo](https://vimeo.com/luxophia/volumerender-delphi)
