@@ -14,7 +14,7 @@ struct TRay
     float3 Vec;
 };
 
-inline TRay newTRay( const float3 Pos_, const float3 Vec_ )
+inline TRay newTRay( float3 Pos_, float3 Vec_ )
 {
     TRay Result;
 
@@ -36,7 +36,7 @@ static int3 _VoxelsN;
 
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【ルーチン】
 
-inline int3 sign3( const float3 V_ )
+inline int3 Sign( float3 V_ )
 {
     int3 Result;
 
@@ -47,7 +47,7 @@ inline int3 sign3( const float3 V_ )
     return Result;
 }
 
-inline float3 abs3( const float3 V_ )
+inline float3 Abs( float3 V_ )
 {
     float3 Result;
 
@@ -58,7 +58,7 @@ inline float3 abs3( const float3 V_ )
     return Result;
 }
 
-inline float3 floor3( const float3 V_ )
+inline float3 Floor( float3 V_ )
 {
     float3 Result;
 
@@ -69,12 +69,12 @@ inline float3 floor3( const float3 V_ )
     return Result;
 }
 
-inline float Pow2( const float X_ )
+inline float Pow2( float X_ )
 {
     return X_ * X_;
 }
 
-inline float3 Pow2( const float3 V_ )
+inline float3 Pow2( float3 V_ )
 {
     float3 Result;
 
@@ -85,7 +85,7 @@ inline float3 Pow2( const float3 V_ )
     return Result;
 }
 
-inline int MinI( const float A_, const float B_, const float C_ )
+inline int MinI( float A_, float B_, float C_ )
 {
     if ( A_ <= B_ )
     {
@@ -99,19 +99,19 @@ inline int MinI( const float A_, const float B_, const float C_ )
     }
 }
 
-inline int MinI( const float3 V_ )
+inline int MinI( float3 V_ )
 {
     return MinI( V_.x, V_.y, V_.z );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-inline float4 GetVolumeBS1( const float3 G_ )
+inline float4 GetVolumeBS1( float3 G_ )
 {
     return _Texture3D.Sample( _Sampler, ( G_ + 0.5 ) / _VoxelsN );
 }
 
-inline float4 GetVolumeBS1( const float X_, const float Y_, const float Z_ )
+inline float4 GetVolumeBS1( float X_, float Y_, float Z_ )
 {
     return GetVolumeBS1( float3( X_, Y_, Z_ ) );
 }
@@ -120,7 +120,7 @@ inline float4 GetVolumeBS1( const float X_, const float Y_, const float Z_ )
 
 inline float4 GetVolumeBS4( float3 G_ )
 {
-    int3 Gi = floor3( G_ );
+    int3 Gi = Floor( G_ );
 
     float3 Gd = G_ - Gi;
     float3 Gb = 1  - Gd;
@@ -168,17 +168,17 @@ inline float4 GetVolumeBS4( float3 G_ )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-inline float4 GetField( const float3 P_ )
+inline float4 GetField( float3 P_ )
 {
     float3 G = P_ / _Size * _VoxelsN - 0.5;
 
-  //return GetVolumeBS1( G );  // Linear    Interpolation
-    return GetVolumeBS4( G );  // B-Spline4 Interpolation
+    return GetVolumeBS1( G );  // Linear    Interpolation
+  //return GetVolumeBS4( G );  // B-Spline4 Interpolation
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-inline float4 GetAccum1( const TRay R_, const float T0_, const float T1_ )
+inline float4 GetAccum1( TRay R_, float T0_, float T1_ )
 {
     const TGaussPoin S1 = { 2.0000000000000000,  0.0000000000000000 };
 
@@ -188,7 +188,7 @@ inline float4 GetAccum1( const TRay R_, const float T0_, const float T1_ )
     return R * ( S1.w * GetField( R_.Vec * ( R * S1.x + C ) + R_.Pos ) );
 }
 
-inline float4 GetAccum2( const TRay R_, const float T0_, const float T1_ )
+inline float4 GetAccum2( TRay R_, float T0_, float T1_ )
 {
     const TGaussPoin S1 = { 1.0000000000000000, -0.5773502691896257 };
     const TGaussPoin S2 = { 1.0000000000000000, -0.5773502691896257 };
@@ -200,7 +200,7 @@ inline float4 GetAccum2( const TRay R_, const float T0_, const float T1_ )
                + S2.w * GetField( R_.Vec * ( R * S2.x + C ) + R_.Pos ) );
 }
 
-inline float4 GetAccum3( const TRay R_, const float T0_, const float T1_ )
+inline float4 GetAccum3( TRay R_, float T0_, float T1_ )
 {
     const TGaussPoin S1 = { 0.5555555555555556, -0.7745966692414834 };
     const TGaussPoin S2 = { 0.8888888888888888,  0.0000000000000000 };
@@ -214,7 +214,7 @@ inline float4 GetAccum3( const TRay R_, const float T0_, const float T1_ )
                + S3.w * GetField( R_.Vec * ( R * S3.x + C ) + R_.Pos ) );
 }
 
-inline float4 GetAccum4( const TRay R_, const float T0_, const float T1_ )
+inline float4 GetAccum4( TRay R_, float T0_, float T1_ )
 {
     const TGaussPoin S1 = { 0.3478548451374538, -0.8611363115940526 };
     const TGaussPoin S2 = { 0.6521451548625461, -0.3399810435848563 };
@@ -230,7 +230,7 @@ inline float4 GetAccum4( const TRay R_, const float T0_, const float T1_ )
                + S4.w * GetField( R_.Vec * ( R * S4.x + C ) + R_.Pos ) );
 }
 
-inline float4 GetAccum5( const TRay R_, const float T0_, const float T1_ )
+inline float4 GetAccum5( TRay R_, float T0_, float T1_ )
 {
     const TGaussPoin S1 = { 0.2369268850561891, -0.9061798459386640 };
     const TGaussPoin S2 = { 0.4786286704993665, -0.5384693101056831 };
@@ -263,7 +263,7 @@ struct TResultP
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TResultP MainP( const TSenderP _Sender )
+TResultP MainP( TSenderP _Sender )
 {
     _Texture3D.GetDimensions( _VoxelsN.x, _VoxelsN.y, _VoxelsN.z );
 
@@ -273,7 +273,7 @@ TResultP MainP( const TSenderP _Sender )
 
     TRay R = newTRay( _Sender.Pos.xyz, normalize( _Sender.Pos.xyz - E ) );
 
-    int3 Gv = sign3( R.Vec );
+    int3 Gv = Sign( R.Vec );
 
     int3 Gvs[ 3 ] = { { Gv.x,    0,    0 },
                       {    0, Gv.y,    0 },
@@ -281,7 +281,7 @@ TResultP MainP( const TSenderP _Sender )
 
     float3 Sd = _Size / _VoxelsN;
 
-    float3 Tv = Sd / abs3( R.Vec );
+    float3 Tv = Sd / Abs( R.Vec );
 
     float3 Tvs[ 3 ] = { { Tv.x,    0,    0 },
                         {    0, Tv.y,    0 },
@@ -289,7 +289,7 @@ TResultP MainP( const TSenderP _Sender )
 
     float3 G = R.Pos / Sd - 0.5;
 
-    int3 Gi = floor3( G );
+    int3 Gi = Floor( G );
 
     float3 Gd = G - Gi;
 
@@ -317,7 +317,7 @@ TResultP MainP( const TSenderP _Sender )
 
         float T1 = Ts[ K ];
 
-        Result.Col += GetAccum3( R, T0, T1 );
+        Result.Col += GetAccum2( R, T0, T1 );
 
         T0 = T1;
 
