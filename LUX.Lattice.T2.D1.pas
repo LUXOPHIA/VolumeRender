@@ -4,7 +4,7 @@ interface //####################################################################
 
 uses LUX, LUX.D1, LUX.D2,
      LUX.M4,
-     LUX.Lattice.T2,
+     LUX.Data.Lattice.T2,
      LUX.Curve.T2.D1;
 
 type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【型】
@@ -80,10 +80,10 @@ begin
 
      with M_ do
      begin
-          _11 := Grid[ X1, Y1 ];  _12 := Grid[ X2, Y1 ];  _13 := Grid[ X3, Y1 ];  _14 := Grid[ X4, Y1 ];
-          _21 := Grid[ X1, Y2 ];  _22 := Grid[ X2, Y2 ];  _23 := Grid[ X3, Y2 ];  _24 := Grid[ X4, Y2 ];
-          _31 := Grid[ X1, Y3 ];  _32 := Grid[ X2, Y3 ];  _33 := Grid[ X3, Y3 ];  _34 := Grid[ X4, Y3 ];
-          _41 := Grid[ X1, Y4 ];  _42 := Grid[ X2, Y4 ];  _43 := Grid[ X3, Y4 ];  _44 := Grid[ X4, Y4 ];
+          _11 := Grids[ X1, Y1 ];  _12 := Grids[ X2, Y1 ];  _13 := Grids[ X3, Y1 ];  _14 := Grids[ X4, Y1 ];
+          _21 := Grids[ X1, Y2 ];  _22 := Grids[ X2, Y2 ];  _23 := Grids[ X3, Y2 ];  _24 := Grids[ X4, Y2 ];
+          _31 := Grids[ X1, Y3 ];  _32 := Grids[ X2, Y3 ];  _33 := Grids[ X3, Y3 ];  _34 := Grids[ X4, Y3 ];
+          _41 := Grids[ X1, Y4 ];  _42 := Grids[ X2, Y4 ];  _43 := Grids[ X3, Y4 ];  _44 := Grids[ X4, Y4 ];
      end;
 end;
 
@@ -97,10 +97,10 @@ begin
 
      with M_ do
      begin
-          _11 := Grid[ X1, Y1 ];  _12 := Grid[ X2, Y1 ];  _13 := Grid[ X3, Y1 ];  _14 := Grid[ X4, Y1 ];
-          _21 := Grid[ X1, Y2 ];  _22 := Grid[ X2, Y2 ];  _23 := Grid[ X3, Y2 ];  _24 := Grid[ X4, Y2 ];
-          _31 := Grid[ X1, Y3 ];  _32 := Grid[ X2, Y3 ];  _33 := Grid[ X3, Y3 ];  _34 := Grid[ X4, Y3 ];
-          _41 := Grid[ X1, Y4 ];  _42 := Grid[ X2, Y4 ];  _43 := Grid[ X3, Y4 ];  _44 := Grid[ X4, Y4 ];
+          _11 := Grids[ X1, Y1 ];  _12 := Grids[ X2, Y1 ];  _13 := Grids[ X3, Y1 ];  _14 := Grids[ X4, Y1 ];
+          _21 := Grids[ X1, Y2 ];  _22 := Grids[ X2, Y2 ];  _23 := Grids[ X3, Y2 ];  _24 := Grids[ X4, Y2 ];
+          _31 := Grids[ X1, Y3 ];  _32 := Grids[ X2, Y3 ];  _33 := Grids[ X3, Y3 ];  _34 := Grids[ X4, Y3 ];
+          _41 := Grids[ X1, Y4 ];  _42 := Grids[ X2, Y4 ];  _43 := Grids[ X3, Y4 ];  _44 := Grids[ X4, Y4 ];
      end;
 end;
 
