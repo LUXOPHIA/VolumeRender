@@ -2,7 +2,7 @@
 
 interface //#################################################################### ■
 
-uses LUX.Lattice.T1, LUX.Curve.T1.D1;
+uses LUX.Data.Lattice.T1, LUX.Curve.T1.D1;
 
 type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【型】
 
@@ -70,15 +70,15 @@ begin
        -3  -2  -1  ・  ・  ・  ・  ・  ・  ・  +7  +8  +9
                    G0  G1              G0  G1             }
 
-     H := BricN;
+     H := BricsN;
 
-     G0 := Item[ 0 ];
-     G1 := Item[ 1 ];
+     G0 := Items[ 0 ];
+     G1 := Items[ 1 ];
 
      Gd.Pos := G0.Pos - G1.Pos;
      Gd.Val := G0.Val - G1.Val;
 
-     for X := 1 to _MarginX do
+     for X := 1 to _MargsX do
      begin
           with G do
           begin
@@ -86,16 +86,16 @@ begin
                Val := G0.Val + X * Gd.Val;
           end;
 
-          Grid[ 0-X ] := G;
+          Grids[ 0-X ] := G;
      end;
 
-     G0 := Item[ H-1 ];
-     G1 := Item[ H   ];
+     G0 := Items[ H-1 ];
+     G1 := Items[ H   ];
 
      Gd.Pos := G1.Pos - G0.Pos;
      Gd.Val := G1.Val - G0.Val;
 
-     for X := 1 to _MarginX do
+     for X := 1 to _MargsX do
      begin
           with G do
           begin
@@ -103,7 +103,7 @@ begin
                Val := G1.Val + X * Gd.Pos;
           end;
 
-          Grid[ H+X ] := G;
+          Grids[ H+X ] := G;
      end;
 end;
 
