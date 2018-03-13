@@ -4,7 +4,7 @@ interface //####################################################################
 
 uses System.UITypes, System.Messaging,
      FMX.Types3D,
-     LUX, LUX.Lattice.T3;
+     LUX, LUX.Data.Lattice.T3;
 
 type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【型】
 
@@ -25,7 +25,7 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        _ContextResetId             :Integer;
        _RequireInitializeAfterLost :Boolean;
      protected
-       _Map :TArray3D;
+       _Map :IArray3D;
        ///// アクセス
        function GetWidth :Integer;
        procedure SetWidth( const Width_:Integer );
@@ -40,7 +40,7 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        constructor Create; override;
        destructor Destroy; override;
        ///// プロパティ
-       property Map    :TArray3D read   _Map                   ;
+       property Map    :IArray3D read   _Map                   ;
        property Width  :Integer  read GetWidth  write SetWidth ;
        property Height :Integer  read GetHeight write SetHeight;
        property Depth  :Integer  read GetDepth  write SetDepth ;
@@ -108,38 +108,38 @@ uses FMX.Types;
 
 function TTexture3D.GetWidth :Integer;
 begin
-     Result := _Map.CountX;
+     Result := _Map.ItemsX;
 end;
 
 procedure TTexture3D.SetWidth( const Width_:Integer );
 begin
      inherited Width := Width_;
 
-     _Map.CountX := Width_;
+     _Map.ItemsX := Width_;
 end;
 
 function TTexture3D.GetHeight :Integer;
 begin
-     Result := _Map.CountY;
+     Result := _Map.ItemsY;
 end;
 
 procedure TTexture3D.SetHeight( const Height_:Integer );
 begin
      inherited Height := Height_;
 
-     _Map.CountY := Height_;
+     _Map.ItemsY := Height_;
 end;
 
 function TTexture3D.GetDepth :Integer;
 begin
-     Result := _Map.CountZ;
+     Result := _Map.ItemsZ;
 end;
 
 procedure TTexture3D.SetDepth( const Depth_:Integer );
 begin
      Finalize;
 
-     _Map.CountZ := Depth_;
+     _Map.ItemsZ := Depth_;
 end;
 
 /////////////////////////////////////////////////////////////////////// メソッド
@@ -193,7 +193,7 @@ end;
 
 procedure TTexture3D.UpdateTexture;
 begin
-     if Assigned( _Map ) then TContextManager.DefaultContextClass.UpdateTexture( Self, _Map.Lines[ 0, 0 ], _Map.StepY );
+     if Assigned( _Map ) then TContextManager.DefaultContextClass.UpdateTexture( Self, _Map.Lines[ 0, 0 ], _Map.ByteStepY );
 end;
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TTexture3D<_TPixel_>
@@ -230,7 +230,7 @@ end;
 
 destructor TTexture3D<_TPixel_>.Destroy;
 begin
-     _Map.Free;
+     ( _Map as TArray3D<_TPixel_> ).DisposeOf;
 
      inherited;
 end;
