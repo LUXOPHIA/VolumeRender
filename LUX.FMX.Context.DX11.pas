@@ -125,8 +125,6 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【型
        class procedure FindBestShaderSource( const Shader_:TContextShader; out Source_:TContextShaderSource );
      protected
        ///// メソッド
-       { assign }
-       function GetValid :Boolean; override;
        { buffer }
        procedure DoCreateBuffer; override;
        procedure DoResize; override;
@@ -158,9 +156,9 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【型
        class procedure DoInitializeShader( const Shader_:TContextShader ); override;
        class procedure DoFinalizeShader( const Shader_:TContextShader ); override;
        procedure DoSetShaders( const VertexShader_,PixelShader_:TContextShader ); override;
-       procedure DoSetShaderVariable( const Name_:string; const Data_:array of TVector3D ); override;
-       procedure DoSetShaderVariable( const Name_:string; const Texture_:TTexture ); override;
-       procedure DoSetShaderVariable( const Name_:string; const Matrix_:TMatrix3D ); override;
+       procedure DoSetShaderVariable( const Name_:string; const Data_:array of TVector3D ); overload; override;
+       procedure DoSetShaderVariable( const Name_:string; const Texture_:TTexture ); overload; override;
+       procedure DoSetShaderVariable( const Name_:string; const Matrix_:TMatrix3D ); overload; override;
        { constructors }
        constructor CreateFromWindow( const Parent_:TWindowHandle; const Width_,Height_:Integer; const Multisample_:TMultisample; const DepthStencil_:Boolean ); override;
        constructor CreateFromTexture( const Texture_:TTexture; const Multisample_:TMultisample; const DepthStencil_:Boolean ); override;
@@ -756,13 +754,6 @@ end;
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& protected
 
 /////////////////////////////////////////////////////////////////////// メソッド
-
-function TLuxDX11Context.GetValid :Boolean;
-begin
-     Result := True;
-end;
-
-//------------------------------------------------------------------------------
 
 procedure TLuxDX11Context.DoCreateBuffer;
 var
@@ -1894,9 +1885,9 @@ begin
                   try
                      with Texture_.Map do
                      begin
-                          for Z := 0 to CountZ-1 do
+                          for Z := 0 to ItemsZ-1 do
                           begin
-                               for Y := 0 to CountY-1 do
+                               for Y := 0 to ItemsY-1 do
                                begin
                                     Move( Lines[ Y, Z ]^,
                                           PByteArray( Mapped.pData )[ Mapped.DepthPitch * Z
@@ -1917,9 +1908,9 @@ begin
                   try
                      with Texture_.Map do
                      begin
-                          for Z := 0 to CountZ-1 do
+                          for Z := 0 to ItemsZ-1 do
                           begin
-                               for Y := 0 to CountY-1 do
+                               for Y := 0 to ItemsY-1 do
                                begin
                                     Move( Lines[ Y, Z ]^,
                                           PByteArray( Mapped.pData )[ Mapped.DepthPitch * Z
